@@ -1,33 +1,16 @@
 
 'use client';
 
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
-import { CreditCard, DollarSign, Loader2, Landmark, Copy, Upload, Smartphone } from 'lucide-react';
-import { useState } from 'react';
+import { Loader2, Landmark, Copy, Upload, Smartphone, CreditCard } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
 import { Label } from '@/components/ui/label';
-
-const cardPaymentSchema = z.object({
-  cardholderName: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
-  cardNumber: z.string().refine((value) => /^\d{16}$/.test(value), {
-    message: 'Card number must be 16 digits.',
-  }),
-  expiryDate: z.string().refine((value) => /^(0[1-9]|1[0-2])\/\d{2}$/.test(value), {
-    message: 'Expiry date must be in MM/YY format.',
-  }),
-  cvc: z.string().refine((value) => /^\d{3,4}$/.test(value), {
-    message: 'CVC must be 3 or 4 digits.',
-  }),
-});
-
-type CardPaymentFormValues = z.infer<typeof cardPaymentSchema>;
 
 interface PaymentFormProps {
   service: {
@@ -58,23 +41,6 @@ export function PaymentForm({ service }: PaymentFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [receipt, setReceipt] = useState<File | null>(null);
 
-  const cardForm = useForm<CardPaymentFormValues>({
-    resolver: zodResolver(cardPaymentSchema),
-    defaultValues: { cardholderName: '', cardNumber: '', expiryDate: '', cvc: '' },
-  });
-
-  const onCardSubmit = async (data: CardPaymentFormValues) => {
-    setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    setIsLoading(false);
-    console.log('Card Payment data:', data);
-    toast({
-      title: 'Payment Successful!',
-      description: `You have successfully subscribed to ${service.title}.`,
-      variant: 'default',
-    });
-  };
-
   const onOtherPaymentSubmit = async (method: string) => {
     setIsLoading(true);
     await new Promise(resolve => setTimeout(resolve, 2000));
@@ -88,46 +54,12 @@ export function PaymentForm({ service }: PaymentFormProps) {
   };
 
   return (
-    <Tabs defaultValue="card" className="w-full">
-      <TabsList className="grid w-full grid-cols-4">
-        <TabsTrigger value="card"><CreditCard className="mr-2 h-4 w-4"/>Card</TabsTrigger>
+    <Tabs defaultValue="crypto" className="w-full">
+      <TabsList className="grid w-full grid-cols-3">
         <TabsTrigger value="crypto">Crypto</TabsTrigger>
         <TabsTrigger value="transfer"><Landmark className="mr-2 h-4 w-4"/>Transfer</TabsTrigger>
         <TabsTrigger value="mobile"><Smartphone className="mr-2 h-4 w-4"/>Mobile</TabsTrigger>
       </TabsList>
-
-      {/* CARD PAYMENT */}
-      <TabsContent value="card">
-        <Form {...cardForm}>
-          <form onSubmit={cardForm.handleSubmit(onCardSubmit)} className="space-y-4 pt-4">
-            <FormField control={cardForm.control} name="cardholderName" render={({ field }) => ( <FormItem> <FormLabel>Cardholder Name</FormLabel> <FormControl> <Input placeholder="John Doe" {...field} /> </FormControl> <FormMessage /> </FormItem> )} />
-            <FormField
-              control={cardForm.control}
-              name="cardNumber"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Card Number</FormLabel>
-                  <div className="relative">
-                    <CreditCard className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <FormControl>
-                      <Input placeholder="0000 0000 0000 0000" {...field} className="pl-10" />
-                    </FormControl>
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="grid grid-cols-2 gap-4">
-              <FormField control={cardForm.control} name="expiryDate" render={({ field }) => ( <FormItem> <FormLabel>Expiry Date</FormLabel> <FormControl> <Input placeholder="MM/YY" {...field} /> </FormControl> <FormMessage /> </FormItem> )} />
-              <FormField control={cardForm.control} name="cvc" render={({ field }) => ( <FormItem> <FormLabel>CVC</FormLabel> <FormControl> <Input placeholder="123" {...field} /> </FormControl> <FormMessage /> </FormItem> )} />
-            </div>
-            <Button type="submit" className="w-full text-lg" disabled={isLoading}>
-              {isLoading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <DollarSign className="mr-2 h-5 w-5" />}
-              Pay ${service.priceAmount}
-            </Button>
-          </form>
-        </Form>
-      </TabsContent>
 
       {/* CRYPTO PAYMENT */}
       <TabsContent value="crypto">
@@ -232,5 +164,3 @@ export function PaymentForm({ service }: PaymentFormProps) {
     </Tabs>
   );
 }
-
-    
