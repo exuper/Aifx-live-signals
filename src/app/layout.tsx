@@ -1,10 +1,10 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
-import { Sidebar, SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
-import { SidebarNav } from '@/components/layout/sidebar-nav';
+import { SidebarProvider } from '@/components/ui/sidebar';
 import { Header } from '@/components/layout/header';
 import { AnimatedBackground } from '@/components/layout/animated-background';
+import { BottomNav } from '@/components/layout/bottom-nav';
 
 export const metadata: Metadata = {
   title: 'AI Forex Signals Live',
@@ -31,16 +31,14 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased min-h-screen">
         <SidebarProvider>
-          <Sidebar>
-            <SidebarNav />
-          </Sidebar>
-          <SidebarInset>
             <AnimatedBackground />
-            <Header />
-            <main className="p-4 sm:p-6 lg:p-8 relative z-10">
-              {children}
-            </main>
-          </SidebarInset>
+            <div className="flex flex-col min-h-screen">
+              <Header />
+              <main className="p-4 sm:p-6 lg:p-8 relative z-10 flex-grow pb-24">
+                {children}
+              </main>
+              <BottomNav />
+            </div>
         </SidebarProvider>
         <Toaster />
       </body>

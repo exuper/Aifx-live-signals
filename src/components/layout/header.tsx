@@ -4,15 +4,13 @@ import { Bell } from "lucide-react";
 import { Button } from "../ui/button";
 import { SidebarTrigger } from "../ui/sidebar";
 import { AppLogo } from "./app-logo";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 
 export function Header() {
-  const isMobile = useIsMobile();
   return (
     <header className="sticky top-0 z-20 flex items-center justify-between px-4 py-2 border-b bg-background/80 backdrop-blur-sm">
       <div className="flex items-center gap-2">
-        {isMobile && <SidebarTrigger />}
+        <SidebarTrigger />
         <AppLogo />
       </div>
       <Popover>

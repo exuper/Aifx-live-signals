@@ -1,8 +1,7 @@
 'use client';
 
-import { BarChart2, BotMessageSquare, Calendar, ShieldCheck, Users, LandPlot } from "lucide-react";
+import { BarChart2, BotMessageSquare, Calendar, ShieldCheck, Users } from "lucide-react";
 import { SidebarHeader, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "../ui/sidebar";
-import { AppLogo } from "./app-logo";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 
