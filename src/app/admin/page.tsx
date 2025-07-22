@@ -1,7 +1,12 @@
 
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { DollarSign, ShieldCheck, Users, BarChart2 } from "lucide-react";
+import { DollarSign, ShieldCheck, Users, BarChart2, Loader2 } from "lucide-react";
+import { Button } from '@/components/ui/button';
 
 const adminFeatures = [
   {
@@ -31,12 +36,44 @@ const adminFeatures = [
 ];
 
 export default function AdminPage() {
+  const router = useRouter();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // This is an insecure way to check for authentication.
+    // In a real app, use a proper authentication provider.
+    const session = localStorage.getItem('admin_session');
+    if (session === 'true') {
+      setIsAuthenticated(true);
+    } else {
+      router.replace('/admin/login');
+    }
+    setIsLoading(false);
+  }, [router]);
+
+  const handleLogout = () => {
+    localStorage.removeItem('admin_session');
+    router.replace('/admin/login');
+  };
+
+  if (isLoading || !isAuthenticated) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="w-16 h-16 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
-      <PageHeader
-        title="Admin Dashboard"
-        description="Manage your application's content and features from here."
-      />
+      <div className="flex justify-between items-center">
+        <PageHeader
+          title="Admin Dashboard"
+          description="Manage your application's content and features from here."
+        />
+        <Button onClick={handleLogout} variant="destructive">Logout</Button>
+      </div>
 
       <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-2">
         {adminFeatures.map((feature) => (
@@ -65,17 +102,6 @@ export default function AdminPage() {
           </Card>
         ))}
       </div>
-       <Card className="mt-8 border-destructive/50">
-        <CardHeader>
-          <CardTitle className="font-headline text-destructive">Security Warning</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-destructive-foreground">
-            This admin panel is currently not protected by authentication.
-            Access control should be implemented to secure these features before use in a production environment.
-          </p>
-        </CardContent>
-      </Card>
     </div>
   );
 }
