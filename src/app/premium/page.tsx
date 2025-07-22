@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Banknote, Bitcoin, CreditCard, Landmark, MessageSquare, UploadCloud, Users } from "lucide-react";
+import { Banknote, Bitcoin, CreditCard, Landmark, MessageSquare, ShieldCheck, UploadCloud, Users } from "lucide-react";
 
 const mentorshipNumber = '+1234567890'; // Placeholder
 const mentorshipMessage = encodeURIComponent("I'm requesting mentorship. My account number is: ");
