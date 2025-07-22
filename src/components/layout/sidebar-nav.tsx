@@ -1,6 +1,7 @@
+
 'use client';
 
-import { BarChart2, BotMessageSquare, Calendar, ShieldCheck, Users } from "lucide-react";
+import { BarChart2, BotMessageSquare, Calendar, ShieldCheck, Users, LayoutDashboard } from "lucide-react";
 import { SidebarHeader, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "../ui/sidebar";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
@@ -11,6 +12,7 @@ const navItems = [
   { href: '/calendar', icon: Calendar, label: 'Economic Calendar' },
   { href: '/premium', icon: ShieldCheck, label: 'Premium / VIP' },
   { href: '/community', icon: Users, label: 'Community' },
+  { href: '/admin', icon: LayoutDashboard, label: 'Admin' },
 ];
 
 export function SidebarNav() {
