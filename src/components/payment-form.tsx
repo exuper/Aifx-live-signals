@@ -101,7 +101,22 @@ export function PaymentForm({ service }: PaymentFormProps) {
         <Form {...cardForm}>
           <form onSubmit={cardForm.handleSubmit(onCardSubmit)} className="space-y-4 pt-4">
             <FormField control={cardForm.control} name="cardholderName" render={({ field }) => ( <FormItem> <FormLabel>Cardholder Name</FormLabel> <FormControl> <Input placeholder="John Doe" {...field} /> </FormControl> <FormMessage /> </FormItem> )} />
-            <FormField control={cardForm.control} name="cardNumber" render={({ field }) => ( <FormItem> <FormLabel>Card Number</FormLabel> <div className="relative"> <CreditCard className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /> <FormControl> <Input placeholder="0000 0000 0000 0000" {...field} className="pl-10" /> </FormControl> </div> <FormMessage /> </FormItem> )} />
+            <FormField
+              control={cardForm.control}
+              name="cardNumber"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Card Number</FormLabel>
+                    <div className="relative">
+                      <CreditCard className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                      <FormControl>
+                        <Input placeholder="0000 0000 0000 0000" {...field} className="pl-10" />
+                      </FormControl>
+                    </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <div className="grid grid-cols-2 gap-4">
               <FormField control={cardForm.control} name="expiryDate" render={({ field }) => ( <FormItem> <FormLabel>Expiry Date</FormLabel> <FormControl> <Input placeholder="MM/YY" {...field} /> </FormControl> <FormMessage /> </FormItem> )} />
               <FormField control={cardForm.control} name="cvc" render={({ field }) => ( <FormItem> <FormLabel>CVC</FormLabel> <FormControl> <Input placeholder="123" {...field} /> </FormControl> <FormMessage /> </FormItem> )} />
