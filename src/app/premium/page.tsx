@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { PaymentForm } from "@/components/payment-form";
-import { Signal, Crown, Bot } from "lucide-react";
+import { Signal, Crown, Bot, GraduationCap } from "lucide-react";
 import { useState } from "react";
 
 const services = [
@@ -36,6 +36,15 @@ const services = [
     priceAmount: 100,
     description: "Automate your trading with our exclusive Expert Advisor bot.",
     cta: "Get the EA"
+  },
+  {
+    id: "mentorship",
+    icon: GraduationCap,
+    title: "Mentorship",
+    price: "$50",
+    priceAmount: 50,
+    description: "One-on-one sessions with our expert traders.",
+    cta: "Get Mentorship"
   }
 ];
 
@@ -52,7 +61,7 @@ export default function PremiumPage() {
       />
 
       <Dialog onOpenChange={(isOpen) => !isOpen && setSelectedService(null)}>
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-2">
           {services.map((service) => (
             <Card key={service.title} className="flex flex-col border-primary/50">
               <CardHeader>
@@ -79,11 +88,11 @@ export default function PremiumPage() {
         </div>
         
         {selectedService && (
-          <DialogContent className="sm:max-w-[425px]">
+          <DialogContent className="sm:max-w-xl">
             <DialogHeader>
               <DialogTitle className="font-headline text-2xl text-primary">{selectedService.title}</DialogTitle>
               <DialogDescription>
-                Complete your payment to get access to {selectedService.title.toLowerCase()}.
+                Choose your preferred payment method to get access to {selectedService.title.toLowerCase()}.
               </DialogDescription>
             </DialogHeader>
             <PaymentForm service={selectedService} />
