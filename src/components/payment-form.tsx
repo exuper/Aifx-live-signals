@@ -40,18 +40,31 @@ const InfoRow = ({ label, value }: { label: string; value: string }) => {
 export function PaymentForm({ service }: PaymentFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [receipt, setReceipt] = useState<File | null>(null);
+  const [senderName, setSenderName] = useState('');
 
   const onOtherPaymentSubmit = async (method: string) => {
     setIsLoading(true);
     await new Promise(resolve => setTimeout(resolve, 2000));
     setIsLoading(false);
-    console.log('Payment method:', method, 'Receipt:', receipt?.name);
+    console.log('Payment method:', method, 'Receipt:', receipt?.name, 'Sender:', senderName);
     toast({
       title: 'Payment Submitted!',
       description: `Your payment for ${service.title} via ${method} is being processed.`,
       variant: 'default',
     });
   };
+
+  const ReceiptUpload = ({ id }: { id: string }) => (
+    <div className="space-y-2 pt-4">
+       <Label htmlFor={`receipt-upload-${id}`}>Upload Receipt (Optional)</Label>
+       <div className="flex gap-2">
+          <Input id={`receipt-upload-${id}`} type="file" onChange={(e) => setReceipt(e.target.files?.[0] || null)} />
+          <Button variant="secondary" size="icon"><Upload className="h-4 w-4"/></Button>
+       </div>
+       {receipt && <p className="text-xs text-muted-foreground">Selected: {receipt.name}</p>}
+    </div>
+  );
+
 
   return (
     <Tabs defaultValue="crypto" className="w-full">
@@ -79,6 +92,7 @@ export function PaymentForm({ service }: PaymentFormProps) {
                     </AccordionContent>
                 </AccordionItem>
             </Accordion>
+             <ReceiptUpload id="crypto" />
              <Button onClick={() => onOtherPaymentSubmit('Crypto')} className="w-full" disabled={isLoading}>
                 {isLoading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : null}
                 I Have Paid
@@ -97,14 +111,6 @@ export function PaymentForm({ service }: PaymentFormProps) {
                         <p className="text-sm">Please send ${service.priceAmount} to the details below, then upload your receipt.</p>
                         <InfoRow label="Recipient Name" value="Forex Signals Inc." />
                         <InfoRow label="Location" value="New York, USA" />
-                         <div className="space-y-2">
-                             <Label htmlFor="receipt-upload-wu">Upload Receipt</Label>
-                             <div className="flex gap-2">
-                                <Input id="receipt-upload-wu" type="file" onChange={(e) => setReceipt(e.target.files?.[0] || null)} />
-                                <Button variant="secondary" size="icon"><Upload className="h-4 w-4"/></Button>
-                             </div>
-                             {receipt && <p className="text-xs text-muted-foreground">Selected: {receipt.name}</p>}
-                        </div>
                     </AccordionContent>
                 </AccordionItem>
                 <AccordionItem value="bank">
@@ -123,6 +129,7 @@ export function PaymentForm({ service }: PaymentFormProps) {
                     </AccordionContent>
                 </AccordionItem>
             </Accordion>
+            <ReceiptUpload id="transfer" />
             <Button onClick={() => onOtherPaymentSubmit('Transfer')} className="w-full" disabled={isLoading}>
                 {isLoading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : null}
                 I Have Paid
@@ -154,6 +161,19 @@ export function PaymentForm({ service }: PaymentFormProps) {
                     </AccordionContent>
                 </AccordionItem>
             </Accordion>
+
+            <div className="space-y-2">
+                <Label htmlFor="sender-name">Sender/Agent Name</Label>
+                <Input 
+                    id="sender-name" 
+                    placeholder="e.g. John Doe or Agent 123" 
+                    value={senderName} 
+                    onChange={(e) => setSenderName(e.target.value)} 
+                />
+            </div>
+            
+            <ReceiptUpload id="mobile" />
+
             <Button onClick={() => onOtherPaymentSubmit('Mobile Money')} className="w-full" disabled={isLoading}>
                 {isLoading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : null}
                 I Have Paid
