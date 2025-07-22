@@ -107,12 +107,12 @@ export function PaymentForm({ service }: PaymentFormProps) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Card Number</FormLabel>
-                  <div className="relative">
-                    <CreditCard className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <FormControl>
-                      <Input placeholder="0000 0000 0000 0000" {...field} className="pl-10" />
-                    </FormControl>
-                  </div>
+                    <div className="relative">
+                      <CreditCard className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                      <FormControl>
+                        <Input placeholder="0000 0000 0000 0000" {...field} className="pl-10" />
+                      </FormControl>
+                    </div>
                   <FormMessage />
                 </FormItem>
               )}
@@ -232,3 +232,5 @@ export function PaymentForm({ service }: PaymentFormProps) {
     </Tabs>
   );
 }
+
+    
