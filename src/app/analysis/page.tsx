@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { analyzeTechnicalChartAction } from './actions';
 import { AnalyzeTechnicalChartOutput } from '@/ai/flows/analyze-technical-chart';
-import { Loader2, UploadCloud } from 'lucide-react';
+import { Loader2, UploadCloud, BotMessageSquare } from 'lucide-react';
 import Image from 'next/image';
 
 export default function AnalysisPage() {
