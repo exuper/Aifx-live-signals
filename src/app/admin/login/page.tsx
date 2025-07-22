@@ -10,39 +10,49 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import { AppLogo } from '@/components/layout/app-logo';
+import { auth } from '@/lib/firebase';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 
 export default function AdminLoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('victormbuya2@gmail.com');
+  const [password, setPassword] = useState('Victor.50');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // This is an insecure, hardcoded login check.
-    // In a real application, you would make an API call to a secure backend.
-    if (email === 'victormbuya2@gmail.com' && password === 'Victor.50') {
-      // Simulate a successful login
-      setTimeout(() => {
-        localStorage.setItem('admin_session', 'true');
-        toast({
-          title: 'Login Successful',
-          description: 'Redirecting to the admin dashboard...',
-        });
-        router.replace('/admin');
-      }, 1000);
-    } else {
-      setTimeout(() => {
-        toast({
-          title: 'Login Failed',
-          description: 'Invalid email or password.',
-          variant: 'destructive',
-        });
-        setIsLoading(false);
-      }, 1000);
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      toast({
+        title: 'Login Successful',
+        description: 'Redirecting to the admin dashboard...',
+      });
+      router.replace('/admin');
+    } catch (error: any) {
+      let errorMessage = 'An unknown error occurred.';
+      switch (error.code) {
+        case 'auth/user-not-found':
+        case 'auth/wrong-password':
+        case 'auth/invalid-credential':
+          errorMessage = 'Invalid email or password.';
+          break;
+        case 'auth/invalid-email':
+          errorMessage = 'Please enter a valid email address.';
+          break;
+        default:
+          errorMessage = 'Login failed. Please try again.';
+          break;
+      }
+      toast({
+        title: 'Login Failed',
+        description: errorMessage,
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 

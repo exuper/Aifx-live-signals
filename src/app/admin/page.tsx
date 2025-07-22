@@ -7,6 +7,8 @@ import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DollarSign, ShieldCheck, Users, BarChart2, Loader2 } from "lucide-react";
 import { Button } from '@/components/ui/button';
+import { auth } from '@/lib/firebase';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
 
 const adminFeatures = [
   {
@@ -41,20 +43,26 @@ export default function AdminPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // This is an insecure way to check for authentication.
-    // In a real app, use a proper authentication provider.
-    const session = localStorage.getItem('admin_session');
-    if (session === 'true') {
-      setIsAuthenticated(true);
-    } else {
-      router.replace('/admin/login');
-    }
-    setIsLoading(false);
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setIsAuthenticated(true);
+      } else {
+        router.replace('/admin/login');
+      }
+      setIsLoading(false);
+    });
+
+    // Cleanup subscription on unmount
+    return () => unsubscribe();
   }, [router]);
 
-  const handleLogout = () => {
-    localStorage.removeItem('admin_session');
-    router.replace('/admin/login');
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      router.replace('/admin/login');
+    } catch (error) {
+      console.error("Error signing out: ", error);
+    }
   };
 
   if (isLoading || !isAuthenticated) {
