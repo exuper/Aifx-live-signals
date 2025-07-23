@@ -2,7 +2,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { PageHeader } from '@/components/page-header';
@@ -12,35 +12,46 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/hooks/use-toast';
-import { getCommunityLinks, updateCommunityLinks, CommunityLinksData } from './actions';
-import { Loader2, MessageCircle, Rss } from 'lucide-react';
+import { getCommunityLinks, updateCommunityLinks, CommunityLinksFormData, CommunityLinkData } from './actions';
+import { Loader2, Trash2, PlusCircle, Link as LinkIcon } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
+// Schema for a single link
 const communityLinkSchema = z.object({
+  id: z.string(),
   name: z.string().min(1, "Name is required"),
   description: z.string().min(1, "Description is required"),
   url: z.string().url("Must be a valid URL"),
   cta: z.string().min(1, "Button text is required"),
+  icon: z.string().min(1, "Icon name is required (e.g., MessageCircle, Rss)"),
 });
 
+// Form schema is an object containing an array of links
 const formSchema = z.object({
-  whatsapp_group: communityLinkSchema,
-  whatsapp_channel: communityLinkSchema,
+  links: z.array(communityLinkSchema),
 });
 
 export default function ManageContentPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<CommunityLinksData>({
+  const { register, control, handleSubmit, reset, formState: { errors } } = useForm<CommunityLinksFormData>({
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      links: [],
+    }
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "links"
   });
 
   useEffect(() => {
     async function loadData() {
       try {
         const data = await getCommunityLinks();
-        reset(data);
+        reset({ links: data });
       } catch (error) {
         toast({
           title: "Error loading content",
@@ -54,7 +65,7 @@ export default function ManageContentPage() {
     loadData();
   }, [reset]);
 
-  const onSubmit = async (data: CommunityLinksData) => {
+  const onSubmit = async (data: CommunityLinksFormData) => {
     setIsSubmitting(true);
     try {
       await updateCommunityLinks(data);
@@ -72,107 +83,112 @@ export default function ManageContentPage() {
       setIsSubmitting(false);
     }
   };
+
+  const addNewLink = () => {
+    append({
+        id: `new_${Date.now()}`,
+        name: 'New Link',
+        description: 'A description for the new link.',
+        url: 'https://example.com',
+        cta: 'Learn More',
+        icon: 'Link'
+    });
+  }
   
   if (isLoading) {
     return (
-        <div className="space-y-8">
-            <PageHeader
-                title="Manage Content"
-                description="Update the links for your WhatsApp communities."
-            />
-            <Card>
-                <CardHeader>
-                    <CardTitle>Community Links</CardTitle>
-                    <CardDescription>Edit the details for your community links below.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-8">
-                   <div className="space-y-4">
-                        <Skeleton className="h-8 w-1/3" />
-                        <Skeleton className="h-10 w-full" />
-                        <Skeleton className="h-20 w-full" />
-                        <Skeleton className="h-10 w-full" />
-                        <Skeleton className="h-10 w-1/2" />
-                   </div>
-                </CardContent>
-            </Card>
-        </div>
-    )
+      <div className="space-y-8">
+        <PageHeader
+          title="Manage Content"
+          description="Update the links for your communities."
+        />
+        <Card>
+          <CardHeader>
+            <CardTitle>Community Links</CardTitle>
+            <CardDescription>Edit the details for your community links below.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-8">
+            <div className="space-y-4">
+              <Skeleton className="h-8 w-1/3" />
+              <Skeleton className="h-40 w-full" />
+              <Skeleton className="h-40 w-full" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
       <PageHeader
         title="Manage Content"
-        description="Update the links and text for your WhatsApp communities."
+        description="Update the links and text for your communities."
       />
 
       <Card>
         <CardHeader>
           <CardTitle className="font-headline">Community Links</CardTitle>
           <CardDescription>
-            Edit the details for your community group and channel below.
+            Add, edit, or remove community links below.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-8">
-          {/* WhatsApp Group */}
-          <div className="space-y-4 p-4 border rounded-lg">
-            <h3 className="flex items-center gap-2 font-semibold text-lg">
-              <MessageCircle className="w-5 h-5 text-primary" />
-              WhatsApp Group
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="whatsapp_group.name">Name</Label>
-                <Input id="whatsapp_group.name" {...register('whatsapp_group.name')} />
-                {errors.whatsapp_group?.name && <p className="text-red-500 text-xs">{errors.whatsapp_group.name.message}</p>}
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="whatsapp_group.url">URL</Label>
-                <Input id="whatsapp_group.url" {...register('whatsapp_group.url')} />
-                {errors.whatsapp_group?.url && <p className="text-red-500 text-xs">{errors.whatsapp_group.url.message}</p>}
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="whatsapp_group.description">Description</Label>
-              <Textarea id="whatsapp_group.description" {...register('whatsapp_group.description')} />
-              {errors.whatsapp_group?.description && <p className="text-red-500 text-xs">{errors.whatsapp_group.description.message}</p>}
-            </div>
-            <div className="space-y-2">
-                <Label htmlFor="whatsapp_group.cta">Button Text (CTA)</Label>
-                <Input id="whatsapp_group.cta" {...register('whatsapp_group.cta')} />
-                {errors.whatsapp_group?.cta && <p className="text-red-500 text-xs">{errors.whatsapp_group.cta.message}</p>}
-            </div>
-          </div>
+        <CardContent className="space-y-6">
+          {fields.map((field, index) => (
+            <div key={field.id} className="space-y-4 p-4 border rounded-lg relative bg-card/50">
+                <Button 
+                    type="button" 
+                    variant="ghost" 
+                    size="icon" 
+                    className="absolute top-2 right-2 text-destructive hover:bg-destructive/10 hover:text-destructive" 
+                    onClick={() => remove(index)}
+                >
+                    <Trash2 className="w-4 h-4" />
+                </Button>
+                
+                <h3 className="flex items-center gap-2 font-semibold text-lg">
+                    <LinkIcon className="w-5 h-5 text-primary" />
+                    Editing Link
+                </h3>
 
-          {/* WhatsApp Channel */}
-          <div className="space-y-4 p-4 border rounded-lg">
-             <h3 className="flex items-center gap-2 font-semibold text-lg">
-              <Rss className="w-5 h-5 text-primary" />
-              WhatsApp Channel
-            </h3>
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                    <Label htmlFor="whatsapp_channel.name">Name</Label>
-                    <Input id="whatsapp_channel.name" {...register('whatsapp_channel.name')} />
-                    {errors.whatsapp_channel?.name && <p className="text-red-500 text-xs">{errors.whatsapp_channel.name.message}</p>}
+                {/* Hidden input for the ID */}
+                <input type="hidden" {...register(`links.${index}.id`)} />
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                        <Label>Name</Label>
+                        <Input {...register(`links.${index}.name`)} />
+                        {errors.links?.[index]?.name && <p className="text-red-500 text-xs">{errors.links[index]?.name?.message}</p>}
+                    </div>
+                    <div className="space-y-2">
+                        <Label>URL</Label>
+                        <Input {...register(`links.${index}.url`)} />
+                        {errors.links?.[index]?.url && <p className="text-red-500 text-xs">{errors.links[index]?.url?.message}</p>}
+                    </div>
                 </div>
-                <div className="space-y-2">
-                    <Label htmlFor="whatsapp_channel.url">URL</Label>
-                    <Input id="whatsapp_channel.url" {...register('whatsapp_channel.url')} />
-                    {errors.whatsapp_channel?.url && <p className="text-red-500 text-xs">{errors.whatsapp_channel.url.message}</p>}
+                 <div className="space-y-2">
+                    <Label>Description</Label>
+                    <Textarea {...register(`links.${index}.description`)} />
+                    {errors.links?.[index]?.description && <p className="text-red-500 text-xs">{errors.links[index]?.description?.message}</p>}
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                        <Label>Button Text (CTA)</Label>
+                        <Input {...register(`links.${index}.cta`)} />
+                        {errors.links?.[index]?.cta && <p className="text-red-500 text-xs">{errors.links[index]?.cta?.message}</p>}
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Icon Name</Label>
+                        <Input {...register(`links.${index}.icon`)} placeholder="e.g. MessageCircle" />
+                        {errors.links?.[index]?.icon && <p className="text-red-500 text-xs">{errors.links[index]?.icon?.message}</p>}
+                    </div>
                 </div>
             </div>
-             <div className="space-y-2">
-              <Label htmlFor="whatsapp_channel.description">Description</Label>
-              <Textarea id="whatsapp_channel.description" {...register('whatsapp_channel.description')} />
-              {errors.whatsapp_channel?.description && <p className="text-red-500 text-xs">{errors.whatsapp_channel.description.message}</p>}
-            </div>
-             <div className="space-y-2">
-                <Label htmlFor="whatsapp_channel.cta">Button Text (CTA)</Label>
-                <Input id="whatsapp_channel.cta" {...register('whatsapp_channel.cta')} />
-                {errors.whatsapp_channel?.cta && <p className="text-red-500 text-xs">{errors.whatsapp_channel.cta.message}</p>}
-            </div>
-          </div>
+          ))}
+
+          <Button type="button" variant="outline" onClick={addNewLink}>
+            <PlusCircle className="mr-2" /> Add New Link
+          </Button>
 
         </CardContent>
       </Card>
@@ -183,7 +199,6 @@ export default function ManageContentPage() {
           {isSubmitting ? 'Saving...' : 'Save Changes'}
         </Button>
       </div>
-
     </form>
   );
 }

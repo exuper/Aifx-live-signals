@@ -5,7 +5,8 @@ import { useEffect, useState } from 'react';
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { MessageCircle, Rss, Loader2 } from "lucide-react";
+import { MessageCircle, Rss, Loader2, Link as LinkIcon } from "lucide-react";
+import * as LucideIcons from 'lucide-react';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -16,11 +17,12 @@ interface CommunityLink {
   description: string;
   url: string;
   cta: string;
+  icon: string;
 }
 
 const iconMap: { [key: string]: React.ElementType } = {
-  whatsapp_group: MessageCircle,
-  whatsapp_channel: Rss,
+  ...LucideIcons,
+  // Add any custom mappings if needed
 };
 
 export default function CommunityPage() {
@@ -30,14 +32,12 @@ export default function CommunityPage() {
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'communityLinks'), (snapshot) => {
       if (snapshot.empty) {
-        console.log("No community links found, initializing with default data.");
-        // If you want to pre-populate, you could do it here, but it's better done via an admin script.
         setIsLoading(false);
         return;
       }
       const linksData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as CommunityLink));
       // Ensure a consistent order
-      linksData.sort((a, b) => a.id.localeCompare(b.id));
+      linksData.sort((a, b) => a.name.localeCompare(b.name));
       setLinks(linksData);
       setIsLoading(false);
     });
@@ -46,7 +46,7 @@ export default function CommunityPage() {
   }, []);
 
   const renderCard = (link: CommunityLink) => {
-    const Icon = iconMap[link.id] || MessageCircle;
+    const Icon = iconMap[link.icon] || LinkIcon;
     return (
       <Card key={link.id} className="flex flex-col">
         <CardHeader>
@@ -68,14 +68,14 @@ export default function CommunityPage() {
           </Button>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   return (
     <div className="space-y-8">
       <PageHeader
         title="Join Our Community"
-        description="Connect with fellow traders and our team on WhatsApp."
+        description="Connect with fellow traders and our team through our official channels."
       />
 
       {isLoading ? (
@@ -88,8 +88,9 @@ export default function CommunityPage() {
           {links.map(renderCard)}
         </div>
       ) : (
-         <div className="text-center text-muted-foreground py-10">
-            <p>Community links will be available soon. Please check back later.</p>
+         <div className="text-center text-muted-foreground py-10 border-2 border-dashed border-muted rounded-lg">
+            <p className='font-semibold'>No Community Links Found</p>
+            <p className='text-sm'>Community links can be added by an admin in the dashboard.</p>
           </div>
       )}
     </div>
