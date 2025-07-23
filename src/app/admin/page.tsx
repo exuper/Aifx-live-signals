@@ -36,12 +36,14 @@ const adminFeatures = [
     title: "Manage Users",
     description: "View and manage user accounts and permissions.",
     icon: Users,
+    href: "/admin/users",
     comingSoon: true,
   },
   {
     title: "View Payments",
     description: "Track and verify user payments and subscriptions.",
     icon: DollarSign,
+    href: "/admin/payments",
     comingSoon: true,
   },
 ];

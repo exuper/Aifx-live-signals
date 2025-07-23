@@ -15,10 +15,12 @@ export default function AdminLayout({
   const router = useRouter();
   const pathname = usePathname();
   const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
+        setIsAuthenticated(true);
         // User is logged in.
         // If they are on the login page, redirect them to the dashboard.
         if (pathname === '/admin/login') {
@@ -27,6 +29,7 @@ export default function AdminLayout({
             setIsLoading(false);
         }
       } else {
+        setIsAuthenticated(false);
         // User is not logged in.
         // If they are not on the login page, redirect them there.
         if (pathname !== '/admin/login') {
@@ -42,11 +45,21 @@ export default function AdminLayout({
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-screen">
+      <div className="flex items-center justify-center min-h-screen bg-background">
         <Loader2 className="w-16 h-16 animate-spin text-primary" />
       </div>
     );
   }
 
-  return <>{children}</>;
+  // Render children only if authenticated or on the login page
+  if (isAuthenticated || pathname === '/admin/login') {
+      return <>{children}</>;
+  }
+
+  // This will be shown briefly while redirecting
+  return (
+     <div className="flex items-center justify-center min-h-screen bg-background">
+        <Loader2 className="w-16 h-16 animate-spin text-primary" />
+      </div>
+  )
 }
