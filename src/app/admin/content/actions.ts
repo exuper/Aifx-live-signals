@@ -52,10 +52,10 @@ export async function getCommunityLinks(): Promise<CommunityLinkData[]> {
 export async function updateCommunityLinks(data: CommunityLinksFormData) {
   const validatedData = formSchema.parse(data);
 
-  try {
-    const batch = writeBatch(db);
-    const linksCollectionRef = collection(db, 'communityLinks');
+  const batch = writeBatch(db);
+  const linksCollectionRef = collection(db, 'communityLinks');
 
+  try {
     // 1. Get all existing links and delete them
     const existingLinksSnapshot = await getDocs(linksCollectionRef);
     existingLinksSnapshot.forEach(doc => {
