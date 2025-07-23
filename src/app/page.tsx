@@ -1,9 +1,36 @@
+
+'use client';
+
+import { useEffect, useState } from 'react';
 import { PageHeader } from "@/components/page-header";
 import { SignalCard } from "@/components/signal-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { signals } from "@/lib/mock-data";
+import { Signal } from "@/lib/mock-data";
+import { db } from '@/lib/firebase';
+import { collection, onSnapshot, orderBy, query } from 'firebase/firestore';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Home() {
+  const [signals, setSignals] = useState<Signal[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const q = query(collection(db, "signals"), orderBy("createdAt", "desc"));
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const signalsData: Signal[] = [];
+      querySnapshot.forEach((doc) => {
+        signalsData.push({ id: doc.id, ...doc.data() } as Signal);
+      });
+      setSignals(signalsData);
+      setIsLoading(false);
+    }, (error) => {
+      console.error("Error fetching signals:", error);
+      setIsLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
   const activeSignals = signals.filter((signal) => signal.status === 'Active');
   const expiredSignals = signals.filter((signal) => signal.status === 'Expired');
 
@@ -20,7 +47,11 @@ export default function Home() {
           <TabsTrigger value="expired">Signal History</TabsTrigger>
         </TabsList>
         <TabsContent value="active">
-          {activeSignals.length > 0 ? (
+          {isLoading ? (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mt-4">
+              {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-[280px] w-full" />)}
+            </div>
+          ) : activeSignals.length > 0 ? (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mt-4">
               {activeSignals.map((signal) => (
                 <SignalCard key={signal.id} signal={signal} />
@@ -33,12 +64,16 @@ export default function Home() {
           )}
         </TabsContent>
         <TabsContent value="expired">
-          {expiredSignals.length > 0 ? (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mt-4">
-            {expiredSignals.map((signal) => (
-              <SignalCard key={signal.id} signal={signal} />
-            ))}
-          </div>
+           {isLoading ? (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mt-4">
+              {[...Array(6)].map((_, i) => <Skeleton key={i} className="h-[280px] w-full" />)}
+            </div>
+          ) : expiredSignals.length > 0 ? (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mt-4">
+              {expiredSignals.map((signal) => (
+                <SignalCard key={signal.id} signal={signal} />
+              ))}
+            </div>
           ) : (
             <div className="mt-8 text-center text-muted-foreground">
               No expired signals found.

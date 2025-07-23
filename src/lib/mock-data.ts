@@ -1,5 +1,8 @@
+
+import type { Timestamp } from "firebase/firestore";
+
 export type Signal = {
-  id: number;
+  id: string; // Changed to string to support Firestore document IDs
   pair: string;
   action: 'BUY' | 'SELL';
   entry: number;
@@ -7,16 +10,17 @@ export type Signal = {
   takeProfit1: number;
   takeProfit2: number;
   status: 'Active' | 'Expired';
+  createdAt: Timestamp;
 };
 
-export const signals: Signal[] = [
+export const signals: Omit<Signal, 'id' | 'createdAt'>[] = [
   { id: 1, pair: 'EUR/USD', action: 'BUY', entry: 1.0750, stopLoss: 1.0700, takeProfit1: 1.0800, takeProfit2: 1.0850, status: 'Active' },
   { id: 2, pair: 'GBP/JPY', action: 'SELL', entry: 201.50, stopLoss: 202.20, takeProfit1: 200.50, takeProfit2: 199.80, status: 'Active' },
   { id: 3, pair: 'AUD/USD', action: 'BUY', entry: 0.6620, stopLoss: 0.6580, takeProfit1: 0.6670, takeProfit2: 0.6700, status: 'Active' },
   { id: 4, pair: 'USD/CAD', action: 'SELL', entry: 1.3700, stopLoss: 1.3750, takeProfit1: 1.3620, takeProfit2: 1.3580, status: 'Expired' },
   { id: 5, pair: 'XAU/USD', action: 'BUY', entry: 2350.00, stopLoss: 2340.00, takeProfit1: 2365.00, takeProfit2: 2375.00, status: 'Expired' },
   { id: 6, pair: 'NZD/USD', action: 'SELL', entry: 0.6150, stopLoss: 0.6190, takeProfit1: 0.6100, takeProfit2: 0.6070, status: 'Expired' },
-];
+].map(({id, ...rest}) => rest); // Remove the temporary numeric ID
 
 export type CalendarEvent = {
   id: number;

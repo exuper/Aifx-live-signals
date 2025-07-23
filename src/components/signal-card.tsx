@@ -2,7 +2,7 @@ import { Signal } from "@/lib/mock-data";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { cn } from "@/lib/utils";
-import { ArrowDown, ArrowUp } from "lucide-react";
+import { ArrowDown, ArrowUp, Clock } from "lucide-react";
 
 type SignalCardProps = {
   signal: Signal;
@@ -11,6 +11,14 @@ type SignalCardProps = {
 export function SignalCard({ signal }: SignalCardProps) {
   const isBuy = signal.action === 'BUY';
   const isActive = signal.status === 'Active';
+
+  const formatTimestamp = (timestamp: any) => {
+    if (!timestamp) return 'Just now';
+    // Firebase timestamps can be seconds/nanoseconds objects
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    return date.toLocaleString();
+  };
+
 
   return (
     <Card className={cn("flex flex-col", isActive ? "border-primary/50" : "opacity-70")}>
@@ -43,10 +51,15 @@ export function SignalCard({ signal }: SignalCardProps) {
           </div>
         </div>
       </CardContent>
-      <CardFooter>
+      <CardFooter className="flex justify-between items-center">
         <Badge variant={isActive ? "outline" : "secondary"} className={cn(isActive && "border-primary text-primary")}>
           {signal.status}
         </Badge>
+         <div className="flex items-center text-xs text-muted-foreground">
+          <Clock className="mr-1 h-3 w-3" />
+          {/* Format timestamp if it exists */}
+          {signal.createdAt && formatTimestamp(signal.createdAt)}
+        </div>
       </CardFooter>
     </Card>
   );
