@@ -1,10 +1,11 @@
 
 'use client';
 
-import { BarChart2, BotMessageSquare, Calendar, ShieldCheck, Users, LayoutDashboard } from "lucide-react";
-import { SidebarHeader, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "../ui/sidebar";
+import { BarChart2, BotMessageSquare, Calendar, ShieldCheck, Users, LayoutDashboard, Settings } from "lucide-react";
+import { SidebarHeader, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarMenuSub, SidebarMenuSubItem, SidebarMenuSubButton } from "../ui/sidebar";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import { AppLogo } from "./app-logo";
 
 const navItems = [
   { href: '/', icon: BarChart2, label: 'Live Signals' },
@@ -12,8 +13,20 @@ const navItems = [
   { href: '/calendar', icon: Calendar, label: 'Economic Calendar' },
   { href: '/premium', icon: ShieldCheck, label: 'Premium / VIP' },
   { href: '/community', icon: Users, label: 'Community' },
-  { href: '/admin', icon: LayoutDashboard, label: 'Admin' },
 ];
+
+const adminItems = [
+    { href: '/admin', icon: LayoutDashboard, label: 'Dashboard', exact: true },
+    { 
+        href: '/admin/signals', 
+        icon: BarChart2, 
+        label: 'Manage Signals',
+        subItems: [
+            { href: '/admin/signals', label: 'View Signals' },
+            { href: '/admin/signals/new', label: 'Create Signal' }
+        ]
+    },
+]
 
 export function SidebarNav() {
   const pathname = usePathname();
@@ -21,10 +34,11 @@ export function SidebarNav() {
   return (
     <>
       <SidebarHeader className="p-4 border-b">
-         {/* Logo removed from here as it's in the header now. Can be re-added if needed for desktop expanded sidebar */}
+         <AppLogo />
       </SidebarHeader>
       <SidebarContent>
         <SidebarMenu>
+          <p className="text-xs text-muted-foreground px-4 py-2 font-semibold">MENU</p>
           {navItems.map((item) => (
             <SidebarMenuItem key={item.href}>
               <SidebarMenuButton asChild isActive={pathname === item.href} tooltip={item.label}>
@@ -35,6 +49,28 @@ export function SidebarNav() {
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
+           <p className="text-xs text-muted-foreground px-4 py-2 mt-4 font-semibold">ADMIN</p>
+           {adminItems.map((item) => (
+            <SidebarMenuItem key={item.href}>
+                <SidebarMenuButton asChild isActive={item.exact ? pathname === item.href : pathname.startsWith(item.href)} tooltip={item.label}>
+                    <Link href={item.href}>
+                        <item.icon />
+                        <span>{item.label}</span>
+                    </Link>
+                </SidebarMenuButton>
+                 {item.subItems && (
+                    <SidebarMenuSub>
+                        {item.subItems.map((sub) => (
+                            <SidebarMenuSubItem key={sub.href}>
+                                <SidebarMenuSubButton asChild isActive={pathname === sub.href}>
+                                    <Link href={sub.href}>{sub.label}</Link>
+                                </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                        ))}
+                    </SidebarMenuSub>
+                 )}
+            </SidebarMenuItem>
+           ))}
         </SidebarMenu>
       </SidebarContent>
     </>
