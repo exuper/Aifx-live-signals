@@ -16,49 +16,49 @@ const adminFeatures = [
     description: "Create, update, and expire trading signals.",
     icon: BarChart2,
     href: "/admin/signals",
-    comingSoon: false,
+    isExternal: false,
   },
   {
     title: "Manage Calendar",
     description: "Add, edit, and delete economic calendar events.",
     icon: Calendar,
     href: "/admin/calendar",
-    comingSoon: false,
+    isExternal: false,
   },
   {
     title: "Manage Content",
     description: "Update community links and other app content.",
     icon: LinkIcon,
     href: "/admin/content",
-    comingSoon: false,
+    isExternal: false,
   },
   {
     title: "Theme Settings",
     description: "Customize the application's look and feel.",
     icon: Palette,
     href: "/admin/theme",
-    comingSoon: false,
+    isExternal: false,
   },
    {
     title: "Payment Gateways",
     description: "Configure your payment provider details.",
     icon: Network,
     href: "/admin/gateways",
-    comingSoon: false,
+    isExternal: false,
   },
   {
     title: "View Payments",
     description: "Track and verify user payments and subscriptions.",
     icon: DollarSign,
     href: "/admin/payments",
-    comingSoon: false,
+    isExternal: false,
   },
   {
     title: "Manage Users",
-    description: "View and manage user accounts and permissions.",
+    description: "View, edit, and manage users in the Firebase Console.",
     icon: Users,
-    href: "/admin/users",
-    comingSoon: true,
+    href: `https://console.firebase.google.com/project/ai-forex-signals-live/authentication/users`,
+    isExternal: true,
   },
 ];
 
@@ -76,11 +76,6 @@ export default function AdminPage() {
 
   const renderFeatureCard = (feature: typeof adminFeatures[0]) => (
      <Card key={feature.title} className="relative overflow-hidden flex flex-col">
-      {feature.comingSoon && (
-        <div className="absolute top-2 right-2 bg-primary/80 text-primary-foreground text-xs font-bold px-2 py-1 rounded">
-          SOON
-        </div>
-      )}
       <CardHeader>
         <div className="flex items-start gap-4">
             <div className="p-3 rounded-full bg-primary/20">
@@ -93,15 +88,13 @@ export default function AdminPage() {
         </div>
       </CardHeader>
         <CardContent className="flex-grow flex items-end">
-          {feature.comingSoon ? (
-             <div className="text-sm text-muted-foreground w-full">
-                This feature is under development.
-              </div>
-          ) : (
-             <Button asChild className="w-full">
+            <Button asChild className="w-full">
+              {feature.isExternal ? (
+                <a href={feature.href} target="_blank" rel="noopener noreferrer">Manage</a>
+              ) : (
                 <Link href={feature.href!}>Manage</Link>
-              </Button>
-          )}
+              )}
+            </Button>
         </CardContent>
     </Card>
   )
