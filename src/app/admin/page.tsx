@@ -3,7 +3,7 @@
 
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { DollarSign, Users, BarChart2, Loader2, Link as LinkIcon, Calendar } from "lucide-react";
+import { DollarSign, Users, BarChart2, Loader2, Link as LinkIcon, Calendar, Palette } from "lucide-react";
 import { Button } from '@/components/ui/button';
 import { auth } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
@@ -30,6 +30,13 @@ const adminFeatures = [
     description: "Update community links and other app content.",
     icon: LinkIcon,
     href: "/admin/content",
+    comingSoon: false,
+  },
+  {
+    title: "Theme Settings",
+    description: "Customize the application's look and feel.",
+    icon: Palette,
+    href: "/admin/theme",
     comingSoon: false,
   },
   {
