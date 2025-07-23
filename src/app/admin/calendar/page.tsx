@@ -33,7 +33,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
+} from "@/components/ui/alert-dialog";
+import { Skeleton } from '@/components/ui/skeleton';
 
 const eventSchema = z.object({
   id: z.string().optional(),
@@ -77,6 +78,7 @@ export default function ManageCalendarPage() {
       setIsLoading(false);
     }, (error) => {
       console.error("Error fetching events:", error);
+      toast({ title: "Error", description: "Could not fetch calendar events.", variant: "destructive" });
       setIsLoading(false);
     });
 
@@ -87,7 +89,7 @@ export default function ManageCalendarPage() {
     setEditingEvent(event);
     reset({
       ...event,
-      date: (event.date as unknown as Timestamp).toDate(),
+      date: event.date,
       actual: event.actual ?? '',
       forecast: event.forecast ?? '',
       previous: event.previous ?? '',
@@ -185,8 +187,24 @@ export default function ManageCalendarPage() {
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div className="flex items-center justify-center p-8">
-              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            <div className="space-y-4">
+              {[...Array(3)].map((_, i) => (
+                <Card key={i}>
+                  <CardHeader className="p-4 bg-muted/50">
+                    <Skeleton className="h-6 w-2/3" />
+                    <Skeleton className="h-4 w-1/3 mt-1" />
+                  </CardHeader>
+                  <CardContent className="p-4 grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    <Skeleton className="h-8 w-full" />
+                    <Skeleton className="h-8 w-full" />
+                    <Skeleton className="h-8 w-full" />
+                  </CardContent>
+                  <CardFooter className="bg-muted/50 p-2 flex justify-end gap-2">
+                    <Skeleton className="h-8 w-20" />
+                    <Skeleton className="h-8 w-20" />
+                  </CardFooter>
+                </Card>
+              ))}
             </div>
           ) : events.length === 0 ? (
             <p className="text-center text-muted-foreground py-8">No events found.</p>
@@ -197,7 +215,7 @@ export default function ManageCalendarPage() {
                         <CardHeader className="flex flex-row items-center justify-between gap-4 p-4 bg-muted/50">
                             <div>
                                 <CardTitle className="font-headline text-lg">{event.event}</CardTitle>
-                                <div className="text-sm text-muted-foreground">{format(event.date as unknown as Date, 'PPP')} @ {event.time}</div>
+                                <div className="text-sm text-muted-foreground">{format(event.date, 'PPP')} @ {event.time}</div>
                             </div>
                              <div className="flex items-center gap-2">
                                 <Badge variant="outline">{event.currency}</Badge>
@@ -360,5 +378,3 @@ function EventFormDialog({isOpen, setIsOpen, onSubmit, isSubmitting, editingEven
     </AlertDialog>
   );
 }
-
-    

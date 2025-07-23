@@ -9,7 +9,7 @@ import { collection, onSnapshot, orderBy, query, Timestamp } from 'firebase/fire
 import { db } from '@/lib/firebase';
 import { Signal } from '@/lib/mock-data';
 import { PageHeader } from '@/components/page-header';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -17,14 +17,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from '@/hooks/use-toast';
 import { createSignal, updateSignalStatus, deleteSignal } from './actions';
 import { Loader2, PlusCircle, Trash2, CheckCircle, XCircle, ArrowUp, ArrowDown, Clock } from 'lucide-react';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import {
@@ -38,6 +30,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { Skeleton } from '@/components/ui/skeleton';
 
 const signalSchema = z.object({
   pair: z.string().min(3, "Pair is required").toUpperCase(),
@@ -52,6 +45,7 @@ export default function ManageSignalsPage() {
   const [signals, setSignals] = useState<Signal[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [signalToDelete, setSignalToDelete] = useState<string | null>(null);
 
   const { register, handleSubmit, control, formState: { errors }, reset } = useForm({
     resolver: zodResolver(signalSchema),
@@ -81,6 +75,7 @@ export default function ManageSignalsPage() {
       setIsLoading(false);
     }, (error) => {
       console.error("Error fetching signals:", error);
+      toast({ title: "Error", description: "Could not fetch signals from the database.", variant: "destructive" });
       setIsLoading(false);
     });
 
@@ -123,13 +118,15 @@ export default function ManageSignalsPage() {
       }
   };
   
-  const handleDeleteSignal = async (id: string) => {
+  const handleDeleteSignal = async () => {
+      if (!signalToDelete) return;
       try {
-          await deleteSignal(id);
+          await deleteSignal(signalToDelete);
           toast({
               title: "Signal Deleted",
               description: "The signal has been permanently removed.",
           })
+          setSignalToDelete(null);
       } catch (error) {
            toast({
             title: "Error",
@@ -148,6 +145,21 @@ export default function ManageSignalsPage() {
         title="Manage Signals"
         description="Create new trading signals and manage existing ones."
       />
+      
+      <AlertDialog open={!!signalToDelete} onOpenChange={() => setSignalToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the signal.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setSignalToDelete(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteSignal} className={buttonVariants({ variant: "destructive" })}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         <div className="lg:col-span-1 lg:sticky top-4">
@@ -160,7 +172,7 @@ export default function ManageSignalsPage() {
                 <div className="space-y-2">
                   <Label htmlFor="pair">Pair (e.g., EUR/USD)</Label>
                   <Input id="pair" {...register('pair')} />
-                  {errors.pair && <p className="text-red-500 text-xs">{errors.pair.message}</p>}
+                  {errors.pair && <p className="text-red-500 text-xs">{errors.pair.message as string}</p>}
                 </div>
                 
                 <div className="space-y-2">
@@ -186,12 +198,12 @@ export default function ManageSignalsPage() {
                     <div className="space-y-2">
                         <Label htmlFor="entry">Entry Price</Label>
                         <Input id="entry" type="number" step="any" {...register('entry')} />
-                         {errors.entry && <p className="text-red-500 text-xs">{errors.entry.message}</p>}
+                         {errors.entry && <p className="text-red-500 text-xs">{errors.entry.message as string}</p>}
                     </div>
                      <div className="space-y-2">
                         <Label htmlFor="stopLoss">Stop Loss</Label>
                         <Input id="stopLoss" type="number" step="any" {...register('stopLoss')} />
-                         {errors.stopLoss && <p className="text-red-500 text-xs">{errors.stopLoss.message}</p>}
+                         {errors.stopLoss && <p className="text-red-500 text-xs">{errors.stopLoss.message as string}</p>}
                     </div>
                 </div>
 
@@ -199,12 +211,12 @@ export default function ManageSignalsPage() {
                     <div className="space-y-2">
                         <Label htmlFor="takeProfit1">Take Profit 1</Label>
                         <Input id="takeProfit1" type="number" step="any" {...register('takeProfit1')} />
-                        {errors.takeProfit1 && <p className="text-red-500 text-xs">{errors.takeProfit1.message}</p>}
+                        {errors.takeProfit1 && <p className="text-red-500 text-xs">{errors.takeProfit1.message as string}</p>}
                     </div>
                      <div className="space-y-2">
                         <Label htmlFor="takeProfit2">Take Profit 2</Label>
                         <Input id="takeProfit2" type="number" step="any" {...register('takeProfit2')} />
-                        {errors.takeProfit2 && <p className="text-red-500 text-xs">{errors.takeProfit2.message}</p>}
+                        {errors.takeProfit2 && <p className="text-red-500 text-xs">{errors.takeProfit2.message as string}</p>}
                     </div>
                 </div>
 
@@ -219,8 +231,8 @@ export default function ManageSignalsPage() {
 
         <div className="lg:col-span-2">
            <div className="space-y-6">
-                <SignalList title="Active Signals" signals={activeSignals} onUpdate={handleUpdateStatus} onDelete={handleDeleteSignal} isLoading={isLoading} />
-                <SignalList title="Signal History" signals={expiredSignals} onUpdate={handleUpdateStatus} onDelete={handleDeleteSignal} isLoading={isLoading} />
+                <SignalList title="Active Signals" signals={activeSignals} onUpdate={handleUpdateStatus} onDelete={(id) => setSignalToDelete(id)} isLoading={isLoading} />
+                <SignalList title="Signal History" signals={expiredSignals} onUpdate={handleUpdateStatus} onDelete={(id) => setSignalToDelete(id)} isLoading={isLoading} />
            </div>
         </div>
       </div>
@@ -235,6 +247,22 @@ function SignalList({title, signals, onUpdate, onDelete, isLoading}: {title: str
         const date = timestamp instanceof Date ? timestamp : (timestamp as Timestamp).toDate();
         return date.toLocaleString();
     };
+    
+    const SignalSkeleton = () => (
+      <Card className="w-full overflow-hidden">
+          <CardHeader className="p-4 bg-muted/50">
+             <Skeleton className="h-6 w-2/3" />
+             <Skeleton className="h-4 w-1/3 mt-1" />
+          </CardHeader>
+          <CardContent className="p-4 grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+             {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-8 w-full" />)}
+          </CardContent>
+          <CardFooter className="bg-muted/50 p-2 flex justify-end gap-2">
+              <Skeleton className="h-8 w-20" />
+              <Skeleton className="h-8 w-20" />
+          </CardFooter>
+      </Card>
+    );
 
     return (
         <Card>
@@ -243,8 +271,9 @@ function SignalList({title, signals, onUpdate, onDelete, isLoading}: {title: str
             </CardHeader>
             <CardContent>
                 {isLoading ? (
-                    <div className="flex items-center justify-center p-8">
-                        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                    <div className="space-y-4">
+                      <SignalSkeleton />
+                      <SignalSkeleton />
                     </div>
                 ) : signals.length === 0 ? (
                     <p className="text-muted-foreground text-center py-4">No {title.toLowerCase()} found.</p>
@@ -300,26 +329,10 @@ function SignalList({title, signals, onUpdate, onDelete, isLoading}: {title: str
                                             Re-activate
                                         </Button>
                                     )}
-                                     <AlertDialog>
-                                        <AlertDialogTrigger asChild>
-                                            <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive hover:bg-destructive/10">
-                                                <Trash2 className="w-4 h-4 mr-2" />
-                                                Delete
-                                            </Button>
-                                        </AlertDialogTrigger>
-                                        <AlertDialogContent>
-                                            <AlertDialogHeader>
-                                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                            <AlertDialogDescription>
-                                                This action cannot be undone. This will permanently delete the signal for {signal.pair}.
-                                            </AlertDialogDescription>
-                                            </AlertDialogHeader>
-                                            <AlertDialogFooter>
-                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                            <AlertDialogAction onClick={() => onDelete(signal.id)} className={buttonVariants({variant: "destructive"})}>Delete</AlertDialogAction>
-                                            </AlertDialogFooter>
-                                        </AlertDialogContent>
-                                    </AlertDialog>
+                                     <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => onDelete(signal.id)}>
+                                        <Trash2 className="w-4 h-4 mr-2" />
+                                        Delete
+                                    </Button>
                                 </CardFooter>
                             </Card>
                         ))}
@@ -329,5 +342,3 @@ function SignalList({title, signals, onUpdate, onDelete, isLoading}: {title: str
         </Card>
     );
 }
-
-    
