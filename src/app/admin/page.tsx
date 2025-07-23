@@ -1,15 +1,14 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DollarSign, Users, BarChart2, Loader2, Link as LinkIcon, Calendar } from "lucide-react";
 import { Button } from '@/components/ui/button';
 import { auth } from '@/lib/firebase';
-import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { signOut } from 'firebase/auth';
 import Link from 'next/link';
+import { useRouter } from "next/navigation";
 
 const adminFeatures = [
   {
@@ -27,6 +26,13 @@ const adminFeatures = [
     comingSoon: false,
   },
   {
+    title: "Manage Content",
+    description: "Update community links and other app content.",
+    icon: LinkIcon,
+    href: "/admin/content",
+    comingSoon: false,
+  },
+  {
     title: "Manage Users",
     description: "View and manage user accounts and permissions.",
     icon: Users,
@@ -38,32 +44,10 @@ const adminFeatures = [
     icon: DollarSign,
     comingSoon: true,
   },
-  {
-    title: "Manage Content",
-    description: "Update community links and other app content.",
-    icon: LinkIcon,
-    comingSoon: true,
-  },
 ];
 
 export default function AdminPage() {
   const router = useRouter();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setIsAuthenticated(true);
-      } else {
-        router.replace('/admin/login');
-      }
-      setIsLoading(false);
-    });
-
-    // Cleanup subscription on unmount
-    return () => unsubscribe();
-  }, [router]);
 
   const handleLogout = async () => {
     try {
@@ -73,14 +57,6 @@ export default function AdminPage() {
       console.error("Error signing out: ", error);
     }
   };
-
-  if (isLoading || !isAuthenticated) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <Loader2 className="w-16 h-16 animate-spin text-primary" />
-      </div>
-    );
-  }
 
   const renderFeatureCard = (feature: typeof adminFeatures[0]) => (
      <Card key={feature.title} className="relative overflow-hidden flex flex-col">
@@ -124,7 +100,7 @@ export default function AdminPage() {
         <Button onClick={handleLogout} variant="destructive">Logout</Button>
       </div>
 
-      <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-2">
+      <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
         {adminFeatures.map(renderFeatureCard)}
       </div>
     </div>

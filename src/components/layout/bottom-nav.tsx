@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { BarChart2, BotMessageSquare, Calendar, ShieldCheck, Users, LayoutDashboard } from 'lucide-react';
+import { BarChart2, BotMessageSquare, Calendar, ShieldCheck, Users, LayoutDashboard, Link as LinkIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const navItems = [
@@ -40,7 +40,7 @@ export function BottomNav() {
           <div
             className={cn(
               'flex flex-col items-center justify-center w-16 h-16 rounded-lg transition-colors',
-              pathname === adminNavItem.href
+              pathname.startsWith(adminNavItem.href)
                 ? 'bg-primary/20 text-primary'
                 : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
             )}
