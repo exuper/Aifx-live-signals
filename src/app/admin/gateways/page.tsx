@@ -24,7 +24,7 @@ const gatewayDetailSchema = z.object({
 const gatewaySchema = z.object({
   id: z.string(),
   title: z.string().min(1, "Title is required."),
-  details: z.array(gatewayDetailSchema),
+  details: z.array(gatewayDetailSchema).min(1, "At least one detail field is required."),
 });
 
 const formSchema = z.object({
@@ -121,8 +121,8 @@ const GatewayCategoryControl = ({ fields, name, register, control, errors, onRem
     <Card className="mt-4">
       <CardContent className="p-6 space-y-6">
         {fields.map((gateway: any, index: number) => (
-          <div key={gateway.id} className="p-4 border rounded-lg space-y-4 relative">
-            <Button type="button" variant="ghost" size="icon" className="absolute top-2 right-2 text-destructive" onClick={() => onRemove(index)}>
+          <div key={gateway.id} className="p-4 border rounded-lg space-y-4 relative bg-card/50">
+            <Button type="button" variant="ghost" size="icon" className="absolute top-2 right-2 text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={() => onRemove(index)}>
               <Trash2 className="w-4 h-4" />
             </Button>
             <div className="space-y-2">
@@ -134,7 +134,7 @@ const GatewayCategoryControl = ({ fields, name, register, control, errors, onRem
           </div>
         ))}
         <Button type="button" variant="outline" onClick={() => onAdd({ id: `new_${Date.now()}`, title: '', details: [{ label: '', value: '' }] })}>
-          <PlusCircle className="mr-2" /> Add Gateway
+          <PlusCircle className="mr-2" /> Add New Gateway
         </Button>
       </CardContent>
     </Card>
@@ -148,27 +148,27 @@ const GatewayDetailsControl = ({ gatewayIndex, parentName, control, register, er
   });
 
   return (
-    <div className="space-y-4 pl-4 border-l">
+    <div className="space-y-4 pl-4 border-l ml-2">
         <Label className="text-sm text-muted-foreground">Gateway Fields</Label>
       {fields.map((detail, detailIndex) => (
-        <div key={detail.id} className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 relative">
-          <Button type="button" variant="ghost" size="icon" className="absolute -top-1 right-0 w-6 h-6 text-destructive" onClick={() => remove(detailIndex)}>
+        <div key={detail.id} className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 relative pr-8">
+          <Button type="button" variant="ghost" size="icon" className="absolute -top-1 right-0 w-6 h-6 text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={() => remove(detailIndex)}>
               <Trash2 className="w-3 h-3" />
             </Button>
           <div className="space-y-1">
-            <Label className="text-xs">Field Label</Label>
+            <Label htmlFor={`${parentName}.${gatewayIndex}.details.${detailIndex}.label`} className="text-xs">Field Label</Label>
             <Input {...register(`${parentName}.${gatewayIndex}.details.${detailIndex}.label`)} placeholder="e.g. Wallet Address" />
              {errors?.[detailIndex]?.label && <p className="text-red-500 text-xs">{errors[detailIndex].label.message}</p>}
           </div>
           <div className="space-y-1">
-            <Label className="text-xs">Field Value</Label>
+            <Label htmlFor={`${parentName}.${gatewayIndex}.details.${detailIndex}.value`} className="text-xs">Field Value</Label>
             <Input {...register(`${parentName}.${gatewayIndex}.details.${detailIndex}.value`)} placeholder="e.g. 0x123..." />
             {errors?.[detailIndex]?.value && <p className="text-red-500 text-xs">{errors[detailIndex].value.message}</p>}
           </div>
         </div>
       ))}
       <Button type="button" size="sm" variant="secondary" onClick={() => append({ label: '', value: '' })}>
-        <PlusCircle className="mr-2" /> Add Field
+        <PlusCircle className="mr-2 h-3 w-3" /> Add Field
       </Button>
     </div>
   );

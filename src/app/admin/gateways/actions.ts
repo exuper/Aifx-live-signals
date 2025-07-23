@@ -13,7 +13,7 @@ const gatewayDetailSchema = z.object({
 const gatewaySchema = z.object({
   id: z.string(),
   title: z.string().min(1, "Title is required."),
-  details: z.array(gatewayDetailSchema),
+  details: z.array(gatewayDetailSchema).min(1, "At least one detail field is required."),
 });
 
 const formSchema = z.object({
