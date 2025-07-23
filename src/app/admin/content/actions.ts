@@ -29,6 +29,10 @@ export async function getCommunityLinks(): Promise<CommunityLinkData[]> {
     const linksCollectionRef = collection(db, 'communityLinks');
     const snapshot = await getDocs(linksCollectionRef);
 
+    if (snapshot.empty) {
+      return [];
+    }
+
     const data = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()

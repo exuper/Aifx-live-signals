@@ -72,7 +72,7 @@ export default function ManageContentPage() {
         if (data && data.length > 0) {
             reset({ links: data });
         } else {
-            // If no data, set the form with default links
+            // If no data, set the form with default links, giving them temporary unique IDs
             const linksWithIds = defaultLinks.map(link => ({...link, id: `new_${Date.now()}_${Math.random()}`}));
             reset({ links: linksWithIds });
         }
@@ -101,6 +101,7 @@ export default function ManageContentPage() {
       const freshData = await getCommunityLinks();
       reset({ links: freshData });
     } catch (error) {
+       console.error("Detailed update error:", error);
       toast({
         title: "Update Failed",
         description: "Could not save your changes. Please try again.",
@@ -112,6 +113,7 @@ export default function ManageContentPage() {
   };
 
   const addNewLink = () => {
+    // Append a new link with a unique temporary ID
     append({
         id: `new_${Date.now()}`,
         name: 'New Link',
