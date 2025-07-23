@@ -3,7 +3,7 @@
 
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { DollarSign, Users, BarChart2, Loader2, Link as LinkIcon, Calendar, Palette } from "lucide-react";
+import { DollarSign, Users, BarChart2, Loader2, Link as LinkIcon, Calendar, Palette, Network } from "lucide-react";
 import { Button } from '@/components/ui/button';
 import { auth } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
@@ -39,18 +39,25 @@ const adminFeatures = [
     href: "/admin/theme",
     comingSoon: false,
   },
-  {
-    title: "Manage Users",
-    description: "View and manage user accounts and permissions.",
-    icon: Users,
-    href: "/admin/users",
-    comingSoon: true,
+   {
+    title: "Payment Gateways",
+    description: "Configure your payment provider details.",
+    icon: Network,
+    href: "/admin/gateways",
+    comingSoon: false,
   },
   {
     title: "View Payments",
     description: "Track and verify user payments and subscriptions.",
     icon: DollarSign,
     href: "/admin/payments",
+    comingSoon: false,
+  },
+  {
+    title: "Manage Users",
+    description: "View and manage user accounts and permissions.",
+    icon: Users,
+    href: "/admin/users",
     comingSoon: true,
   },
 ];
