@@ -2,18 +2,19 @@
 'use client';
 
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
-import { Loader2, Landmark, Copy, Upload, Smartphone, CreditCard } from 'lucide-react';
+import { Loader2, Landmark, Copy, Upload, Smartphone } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
 import { Label } from '@/components/ui/label';
+import { useAuth } from '@/hooks/use-auth';
+import { submitPayment } from '@/app/premium/actions';
 
 interface PaymentFormProps {
   service: {
+    id: string;
     title: string;
     priceAmount: number;
   };
@@ -41,17 +42,51 @@ export function PaymentForm({ service }: PaymentFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [receipt, setReceipt] = useState<File | null>(null);
   const [senderName, setSenderName] = useState('');
+  const { user } = useAuth();
 
-  const onOtherPaymentSubmit = async (method: string) => {
+  const handleSubmit = async (method: string) => {
+    if (!user) {
+        toast({ title: "Authentication Error", description: "You must be logged in to make a payment.", variant: "destructive" });
+        return;
+    }
+
     setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    setIsLoading(false);
-    console.log('Payment method:', method, 'Receipt:', receipt?.name, 'Sender:', senderName);
-    toast({
-      title: 'Payment Submitted!',
-      description: `Your payment for ${service.title} via ${method} is being processed.`,
-      variant: 'default',
-    });
+
+    try {
+        const formData = new FormData();
+        formData.append('userId', user.uid);
+        formData.append('userEmail', user.email || 'unknown');
+        formData.append('serviceId', service.id);
+        formData.append('serviceTitle', service.title);
+        formData.append('priceAmount', service.priceAmount.toString());
+        formData.append('paymentMethod', method);
+        if (senderName) {
+            formData.append('senderName', senderName);
+        }
+        if (receipt) {
+            formData.append('receipt', receipt);
+        }
+
+        const result = await submitPayment(formData);
+
+        if (result.success) {
+            toast({
+                title: 'Payment Submitted!',
+                description: `Your payment for ${service.title} via ${method} is being processed.`,
+            });
+        } else {
+            throw new Error(result.error || 'An unknown error occurred.');
+        }
+
+    } catch (error: any) {
+        toast({
+            title: 'Submission Failed',
+            description: error.message || "Could not submit payment. Please try again.",
+            variant: 'destructive',
+        });
+    } finally {
+        setIsLoading(false);
+    }
   };
 
   const ReceiptUpload = ({ id }: { id: string }) => (
@@ -93,7 +128,7 @@ export function PaymentForm({ service }: PaymentFormProps) {
                 </AccordionItem>
             </Accordion>
              <ReceiptUpload id="crypto" />
-             <Button onClick={() => onOtherPaymentSubmit('Crypto')} className="w-full" disabled={isLoading}>
+             <Button onClick={() => handleSubmit('Crypto')} className="w-full" disabled={isLoading}>
                 {isLoading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : null}
                 I Have Paid
             </Button>
@@ -130,7 +165,7 @@ export function PaymentForm({ service }: PaymentFormProps) {
                 </AccordionItem>
             </Accordion>
             <ReceiptUpload id="transfer" />
-            <Button onClick={() => onOtherPaymentSubmit('Transfer')} className="w-full" disabled={isLoading}>
+            <Button onClick={() => handleSubmit('Transfer')} className="w-full" disabled={isLoading}>
                 {isLoading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : null}
                 I Have Paid
             </Button>
@@ -174,7 +209,7 @@ export function PaymentForm({ service }: PaymentFormProps) {
             
             <ReceiptUpload id="mobile" />
 
-            <Button onClick={() => onOtherPaymentSubmit('Mobile Money')} className="w-full" disabled={isLoading}>
+            <Button onClick={() => handleSubmit('Mobile Money')} className="w-full" disabled={isLoading || !senderName}>
                 {isLoading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : null}
                 I Have Paid
             </Button>

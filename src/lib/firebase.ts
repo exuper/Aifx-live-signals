@@ -3,12 +3,13 @@
 import { initializeApp, getApps } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
   projectId: "ai-forex-signals-live",
   appId: "1:513364826247:web:81c256a41c6ceccc368022",
-  storageBucket: "ai-forex-signals-live.firebasestorage.app",
+  storageBucket: "ai-forex-signals-live.appspot.com",
   apiKey: "AIzaSyBlogQotFEGSgDqgjIZXpggyYLIdcS2mDI",
   authDomain: "ai-forex-signals-live.firebaseapp.com",
   messagingSenderId: "513364826247",
@@ -24,3 +25,4 @@ if (!getApps().length) {
 
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+export const storage = getStorage(app);
