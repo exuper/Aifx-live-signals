@@ -2,22 +2,21 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { collection, onSnapshot, orderBy, query } from 'firebase/firestore';
+import { collection, onSnapshot, orderBy, query, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Signal } from '@/lib/mock-data';
 import { PageHeader } from '@/components/page-header';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
 import { createSignal, updateSignalStatus, deleteSignal } from './actions';
-import { Loader2, PlusCircle, Trash2, CheckCircle, XCircle } from 'lucide-react';
+import { Loader2, PlusCircle, Trash2, CheckCircle, XCircle, ArrowUp, ArrowDown, Clock } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -53,7 +52,6 @@ export default function ManageSignalsPage() {
   const [signals, setSignals] = useState<Signal[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const router = useRouter();
 
   const { register, handleSubmit, control, formState: { errors }, reset } = useForm({
     resolver: zodResolver(signalSchema),
@@ -72,7 +70,12 @@ export default function ManageSignalsPage() {
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const signalsData: Signal[] = [];
       querySnapshot.forEach((doc) => {
-        signalsData.push({ id: doc.id, ...doc.data() } as Signal);
+        const data = doc.data();
+        signalsData.push({ 
+          id: doc.id,
+           ...data,
+           createdAt: data.createdAt ? (data.createdAt as Timestamp).toDate() : new Date(),
+        } as unknown as Signal);
       });
       setSignals(signalsData);
       setIsLoading(false);
@@ -146,8 +149,8 @@ export default function ManageSignalsPage() {
         description="Create new trading signals and manage existing ones."
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-1">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+        <div className="lg:col-span-1 lg:sticky top-4">
           <Card>
             <CardHeader>
               <CardTitle className="font-headline">Create New Signal</CardTitle>
@@ -216,8 +219,8 @@ export default function ManageSignalsPage() {
 
         <div className="lg:col-span-2">
            <div className="space-y-6">
-                <SignalTable title="Active Signals" signals={activeSignals} onUpdate={handleUpdateStatus} onDelete={handleDeleteSignal} isLoading={isLoading} />
-                <SignalTable title="Signal History" signals={expiredSignals} onUpdate={handleUpdateStatus} onDelete={handleDeleteSignal} isLoading={isLoading} />
+                <SignalList title="Active Signals" signals={activeSignals} onUpdate={handleUpdateStatus} onDelete={handleDeleteSignal} isLoading={isLoading} />
+                <SignalList title="Signal History" signals={expiredSignals} onUpdate={handleUpdateStatus} onDelete={handleDeleteSignal} isLoading={isLoading} />
            </div>
         </div>
       </div>
@@ -226,7 +229,13 @@ export default function ManageSignalsPage() {
 }
 
 
-function SignalTable({title, signals, onUpdate, onDelete, isLoading}: {title: string, signals: Signal[], onUpdate: (id: string, status: 'Active' | 'Expired') => void, onDelete: (id: string) => void, isLoading: boolean}) {
+function SignalList({title, signals, onUpdate, onDelete, isLoading}: {title: string, signals: Signal[], onUpdate: (id: string, status: 'Active' | 'Expired') => void, onDelete: (id: string) => void, isLoading: boolean}) {
+    const formatTimestamp = (timestamp: any) => {
+        if (!timestamp) return 'Just now';
+        const date = timestamp instanceof Date ? timestamp : (timestamp as Timestamp).toDate();
+        return date.toLocaleString();
+    };
+
     return (
         <Card>
             <CardHeader>
@@ -237,79 +246,88 @@ function SignalTable({title, signals, onUpdate, onDelete, isLoading}: {title: st
                     <div className="flex items-center justify-center p-8">
                         <Loader2 className="w-8 h-8 animate-spin text-primary" />
                     </div>
+                ) : signals.length === 0 ? (
+                    <p className="text-muted-foreground text-center py-4">No {title.toLowerCase()} found.</p>
                 ) : (
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Pair</TableHead>
-                            <TableHead>Action</TableHead>
-                            <TableHead>Entry</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {signals.length === 0 ? (
-                             <TableRow>
-                                <TableCell colSpan={5} className="text-center text-muted-foreground">
-                                    No {title.toLowerCase()} found.
-                                </TableCell>
-                            </TableRow>
-                        ) : (
-                            signals.map((signal) => (
-                                <TableRow key={signal.id}>
-                                    <TableCell className="font-bold">{signal.pair}</TableCell>
-                                    <TableCell>
+                    <div className="space-y-4">
+                        {signals.map(signal => (
+                            <Card key={signal.id} className="w-full overflow-hidden">
+                                <CardHeader className="flex flex-row items-center justify-between gap-4 p-4 bg-muted/50">
+                                    <div>
+                                        <CardTitle className="font-headline text-lg">{signal.pair}</CardTitle>
+                                        <div className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                                            <Clock className="w-3 h-3" />
+                                            {formatTimestamp(signal.createdAt)}
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2">
                                         <Badge variant={signal.action === 'BUY' ? 'default' : 'destructive'} className={cn(signal.action === 'BUY' ? "bg-green-600" : "bg-red-600")}>
+                                            {signal.action === 'BUY' ? <ArrowUp className="mr-1 w-4 h-4"/> : <ArrowDown className="mr-1 w-4 h-4"/>}
                                             {signal.action}
                                         </Badge>
-                                    </TableCell>
-                                    <TableCell className="font-mono">{signal.entry}</TableCell>
-                                    <TableCell>
-                                         <Badge variant={signal.status === 'Active' ? 'outline' : 'secondary'} className={cn(signal.status === 'Active' && "border-primary text-primary")}>
+                                        <Badge variant={signal.status === 'Active' ? 'outline' : 'secondary'} className={cn(signal.status === 'Active' && "border-primary text-primary")}>
                                             {signal.status}
                                         </Badge>
-                                    </TableCell>
-                                    <TableCell className="text-right space-x-2">
-                                        {signal.status === 'Active' && (
-                                            <Button variant="ghost" size="icon" onClick={() => onUpdate(signal.id, 'Expired')}>
-                                                <XCircle className="w-4 h-4 text-orange-500" />
+                                    </div>
+                                </CardHeader>
+                                <CardContent className="p-4 grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+                                    <div className="flex flex-col">
+                                        <span className="text-muted-foreground">Entry</span>
+                                        <span className="font-mono">{signal.entry}</span>
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="text-muted-foreground">Stop Loss</span>
+                                        <span className="font-mono text-red-400">{signal.stopLoss}</span>
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="text-muted-foreground">TP 1</span>
+                                        <span className="font-mono text-green-400">{signal.takeProfit1}</span>
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="text-muted-foreground">TP 2</span>
+                                        <span className="font-mono text-green-400">{signal.takeProfit2}</span>
+                                    </div>
+                                </CardContent>
+                                <CardFooter className="bg-muted/50 p-2 flex justify-end gap-2">
+                                      {signal.status === 'Active' ? (
+                                        <Button variant="ghost" size="sm" onClick={() => onUpdate(signal.id, 'Expired')}>
+                                            <XCircle className="w-4 h-4 mr-2 text-orange-500" />
+                                            Expire
+                                        </Button>
+                                    ) : (
+                                        <Button variant="ghost" size="sm" onClick={() => onUpdate(signal.id, 'Active')}>
+                                            <CheckCircle className="w-4 h-4 mr-2 text-green-500" />
+                                            Re-activate
+                                        </Button>
+                                    )}
+                                     <AlertDialog>
+                                        <AlertDialogTrigger asChild>
+                                            <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive hover:bg-destructive/10">
+                                                <Trash2 className="w-4 h-4 mr-2" />
+                                                Delete
                                             </Button>
-                                        )}
-                                        {signal.status === 'Expired' && (
-                                             <Button variant="ghost" size="icon" onClick={() => onUpdate(signal.id, 'Active')}>
-                                                <CheckCircle className="w-4 h-4 text-green-500" />
-                                            </Button>
-                                        )}
-                                        <AlertDialog>
-                                            <AlertDialogTrigger asChild>
-                                                <Button variant="ghost" size="icon">
-                                                    <Trash2 className="w-4 h-4 text-destructive" />
-                                                </Button>
-                                            </AlertDialogTrigger>
-                                            <AlertDialogContent>
-                                                <AlertDialogHeader>
-                                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                                <AlertDialogDescription>
-                                                    This action cannot be undone. This will permanently delete the signal
-                                                    for {signal.pair}.
-                                                </AlertDialogDescription>
-                                                </AlertDialogHeader>
-                                                <AlertDialogFooter>
-                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                <AlertDialogAction onClick={() => onDelete(signal.id)}>Delete</AlertDialogAction>
-                                                </AlertDialogFooter>
-                                            </AlertDialogContent>
-                                        </AlertDialog>
-                                    </TableCell>
-                                </TableRow>
-                            ))
-                        )}
-                    </TableBody>
-                </Table>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                This action cannot be undone. This will permanently delete the signal for {signal.pair}.
+                                            </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                            <AlertDialogAction onClick={() => onDelete(signal.id)} className={buttonVariants({variant: "destructive"})}>Delete</AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
+                                </CardFooter>
+                            </Card>
+                        ))}
+                    </div>
                 )}
             </CardContent>
         </Card>
     );
 }
 
+    

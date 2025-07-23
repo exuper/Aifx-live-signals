@@ -9,15 +9,14 @@ import { collection, onSnapshot, orderBy, query, Timestamp } from 'firebase/fire
 import { db } from '@/lib/firebase';
 import { CalendarEvent } from '@/lib/mock-data';
 import { PageHeader } from '@/components/page-header';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button, buttonVariants } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
 import { createCalendarEvent, updateCalendarEvent, deleteCalendarEvent } from './actions';
 import { Loader2, PlusCircle, Trash2, Edit } from 'lucide-react';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -58,7 +57,7 @@ export default function ManageCalendarPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [eventToDelete, setEventToDelete] = useState<string | null>(null);
 
-  const { register, handleSubmit, control, formState: { errors }, reset, setValue } = useForm<EventFormData>({
+  const { register, handleSubmit, control, formState: { errors }, reset } = useForm<EventFormData>({
     resolver: zodResolver(eventSchema),
   });
   
@@ -154,7 +153,6 @@ export default function ManageCalendarPage() {
         </Button>
       </div>
 
-      {/* Main Form Dialog */}
       <EventFormDialog
         isOpen={isDialogOpen}
         setIsOpen={setIsDialogOpen}
@@ -166,7 +164,6 @@ export default function ManageCalendarPage() {
         register={register}
       />
       
-      {/* Delete Confirmation Dialog */}
       <AlertDialog open={!!eventToDelete} onOpenChange={() => setEventToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -177,7 +174,7 @@ export default function ManageCalendarPage() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setEventToDelete(null)}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
+            <AlertDialogAction onClick={handleDelete} className={buttonVariants({ variant: "destructive" })}>Delete</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -191,55 +188,54 @@ export default function ManageCalendarPage() {
             <div className="flex items-center justify-center p-8">
               <Loader2 className="w-8 h-8 animate-spin text-primary" />
             </div>
+          ) : events.length === 0 ? (
+            <p className="text-center text-muted-foreground py-8">No events found.</p>
           ) : (
-            <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Time</TableHead>
-                  <TableHead>Currency</TableHead>
-                  <TableHead>Event</TableHead>
-                  <TableHead>Impact</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {events.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center text-muted-foreground">
-                      No events found.
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  events.map((event) => (
-                    <TableRow key={event.id}>
-                      <TableCell>{format(event.date as unknown as Date, 'PPP')}</TableCell>
-                      <TableCell>{event.time}</TableCell>
-                      <TableCell><Badge variant="outline">{event.currency}</Badge></TableCell>
-                      <TableCell className="font-medium">{event.event}</TableCell>
-                      <TableCell>
-                        <Badge variant="secondary" className={cn({
-                          'bg-red-500/20 text-red-400 border-red-500/30': event.impact === 'High',
-                          'bg-orange-500/20 text-orange-400 border-orange-500/30': event.impact === 'Medium',
-                          'bg-yellow-500/20 text-yellow-400 border-yellow-500/30': event.impact === 'Low',
-                        })}>
-                          {event.impact}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right space-x-2">
-                         <Button variant="ghost" size="icon" onClick={() => openEditDialog(event)}>
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button variant="ghost" size="icon" onClick={() => setEventToDelete(event.id)}>
-                            <Trash2 className="w-4 h-4 text-destructive" />
-                          </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
+            <div className="space-y-4">
+                {events.map((event) => (
+                    <Card key={event.id} className="w-full overflow-hidden">
+                        <CardHeader className="flex flex-row items-center justify-between gap-4 p-4 bg-muted/50">
+                            <div>
+                                <CardTitle className="font-headline text-lg">{event.event}</CardTitle>
+                                <div className="text-sm text-muted-foreground">{format(event.date as unknown as Date, 'PPP')} @ {event.time}</div>
+                            </div>
+                             <div className="flex items-center gap-2">
+                                <Badge variant="outline">{event.currency}</Badge>
+                                <Badge variant="secondary" className={cn({
+                                'bg-red-500/20 text-red-400 border-red-500/30': event.impact === 'High',
+                                'bg-orange-500/20 text-orange-400 border-orange-500/30': event.impact === 'Medium',
+                                'bg-yellow-500/20 text-yellow-400 border-yellow-500/30': event.impact === 'Low',
+                                })}>
+                                {event.impact}
+                                </Badge>
+                             </div>
+                        </CardHeader>
+                         <CardContent className="p-4 grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
+                            <div className="flex flex-col">
+                                <span className="text-muted-foreground">Actual</span>
+                                <span className="font-mono">{event.actual || '-'}</span>
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-muted-foreground">Forecast</span>
+                                <span className="font-mono">{event.forecast || '-'}</span>
+                            </div>
+                             <div className="flex flex-col">
+                                <span className="text-muted-foreground">Previous</span>
+                                <span className="font-mono">{event.previous || '-'}</span>
+                            </div>
+                         </CardContent>
+                         <CardFooter className="bg-muted/50 p-2 flex justify-end gap-2">
+                             <Button variant="ghost" size="sm" onClick={() => openEditDialog(event)}>
+                                <Edit className="w-4 h-4 mr-2" />
+                                Edit
+                            </Button>
+                            <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => setEventToDelete(event.id)}>
+                                <Trash2 className="w-4 h-4 mr-2" />
+                                Delete
+                            </Button>
+                         </CardFooter>
+                    </Card>
+                ))}
             </div>
           )}
         </CardContent>
@@ -248,7 +244,6 @@ export default function ManageCalendarPage() {
   );
 }
 
-// Separate component for the form dialog to keep main component cleaner
 function EventFormDialog({isOpen, setIsOpen, onSubmit, isSubmitting, editingEvent, control, errors, register}: any) {
   return (
     <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
@@ -365,3 +360,5 @@ function EventFormDialog({isOpen, setIsOpen, onSubmit, isSubmitting, editingEven
     </AlertDialog>
   );
 }
+
+    
