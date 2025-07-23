@@ -23,7 +23,7 @@ export const signals: Omit<Signal, 'id' | 'createdAt'>[] = [
 ].map(({id, ...rest}) => rest); // Remove the temporary numeric ID
 
 export type CalendarEvent = {
-  id: number;
+  id: string;
   time: string;
   currency: string;
   impact: 'High' | 'Medium' | 'Low';
@@ -31,13 +31,14 @@ export type CalendarEvent = {
   actual: string;
   forecast: string;
   previous: string;
+  date: Timestamp;
 };
 
-export const calendarEvents: CalendarEvent[] = [
+export const calendarEvents: Omit<CalendarEvent, 'id' | 'date'>[] = [
     { id: 1, time: '08:30', currency: 'USD', impact: 'High', event: 'Non-Farm Employment Change', actual: '272K', forecast: '182K', previous: '165K' },
     { id: 2, time: '10:00', currency: 'CAD', impact: 'Medium', event: 'Ivey PMI', actual: '52.0', forecast: '65.2', previous: '63.0' },
     { id: 3, time: '13:00', currency: 'USD', impact: 'Low', event: 'Final Wholesale Inventories m/m', actual: '0.1%', forecast: '0.2%', previous: '0.2%' },
     { id: 4, time: '19:30', currency: 'CNY', impact: 'High', event: 'CPI y/y', actual: '0.3%', forecast: '0.4%', previous: '0.3%' },
     { id: 5, time: '21:45', currency: 'NZD', impact: 'Medium', event: 'Visitor Arrivals m/m', actual: '-1.5%', forecast: '', previous: '1.2%' },
     { id: 6, time: 'All Day', currency: 'CHF', impact: 'Low', event: 'Bank Holiday', actual: '', forecast: '', previous: '' },
-];
+].map(({id, ...rest}) => rest);

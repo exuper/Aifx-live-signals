@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { DollarSign, ShieldCheck, Users, BarChart2, Loader2, Link as LinkIcon } from "lucide-react";
+import { DollarSign, Users, BarChart2, Loader2, Link as LinkIcon, Calendar } from "lucide-react";
 import { Button } from '@/components/ui/button';
 import { auth } from '@/lib/firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
@@ -17,6 +17,13 @@ const adminFeatures = [
     description: "Create, update, and expire trading signals.",
     icon: BarChart2,
     href: "/admin/signals",
+    comingSoon: false,
+  },
+  {
+    title: "Manage Calendar",
+    description: "Add, edit, and delete economic calendar events.",
+    icon: Calendar,
+    href: "/admin/calendar",
     comingSoon: false,
   },
   {

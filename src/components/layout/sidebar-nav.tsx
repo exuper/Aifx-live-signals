@@ -17,15 +17,8 @@ const navItems = [
 
 const adminItems = [
     { href: '/admin', icon: LayoutDashboard, label: 'Dashboard', exact: true },
-    { 
-        href: '/admin/signals', 
-        icon: BarChart2, 
-        label: 'Manage Signals',
-        subItems: [
-            { href: '/admin/signals', label: 'View Signals' },
-            { href: '/admin/signals/new', label: 'Create Signal' }
-        ]
-    },
+    { href: '/admin/signals', icon: BarChart2, label: 'Manage Signals' },
+    { href: '/admin/calendar', icon: Calendar, label: 'Manage Calendar' },
 ]
 
 export function SidebarNav() {
@@ -58,17 +51,6 @@ export function SidebarNav() {
                         <span>{item.label}</span>
                     </Link>
                 </SidebarMenuButton>
-                 {item.subItems && (
-                    <SidebarMenuSub>
-                        {item.subItems.map((sub) => (
-                            <SidebarMenuSubItem key={sub.href}>
-                                <SidebarMenuSubButton asChild isActive={pathname === sub.href}>
-                                    <Link href={sub.href}>{sub.label}</Link>
-                                </SidebarMenuSubButton>
-                            </SidebarMenuSubItem>
-                        ))}
-                    </SidebarMenuSub>
-                 )}
             </SidebarMenuItem>
            ))}
         </SidebarMenu>
