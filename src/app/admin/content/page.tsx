@@ -31,6 +31,23 @@ const formSchema = z.object({
   links: z.array(communityLinkSchema),
 });
 
+const defaultLinks: Omit<CommunityLinkData, 'id'>[] = [
+    {
+        name: "WhatsApp Group",
+        description: "Join our interactive community group to discuss strategies, share insights, and connect with other traders.",
+        url: "https://chat.whatsapp.com/yourgroupinvite",
+        cta: "Join Group",
+        icon: "MessageCircle"
+    },
+    {
+        name: "WhatsApp Channel",
+        description: "Subscribe to our channel for important announcements, market updates, and exclusive content from our analysts.",
+        url: "https://whatsapp.com/channel/yourchannelinvite",
+        cta: "Subscribe to Channel",
+        icon: "Rss"
+    }
+];
+
 export default function ManageContentPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -50,8 +67,14 @@ export default function ManageContentPage() {
   useEffect(() => {
     async function loadData() {
       try {
-        const data = await getCommunityLinks();
-        reset({ links: data });
+        let data = await getCommunityLinks();
+        if (data.length === 0) {
+            // If no data, populate form with default links (client side)
+            const linksWithTempIds = defaultLinks.map(link => ({...link, id: `new_${Date.now()}_${Math.random()}`}));
+            reset({ links: linksWithTempIds });
+        } else {
+            reset({ links: data });
+        }
       } catch (error) {
         toast({
           title: "Error loading content",
@@ -73,6 +96,7 @@ export default function ManageContentPage() {
         title: "Content Updated!",
         description: "Your community links have been saved.",
       });
+      // Optionally, you could refetch the data here to get the new permanent IDs
     } catch (error) {
       toast({
         title: "Update Failed",

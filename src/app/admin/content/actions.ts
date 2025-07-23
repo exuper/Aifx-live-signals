@@ -27,36 +27,6 @@ export type CommunityLinksFormData = z.infer<typeof formSchema>;
 export async function getCommunityLinks(): Promise<CommunityLinkData[]> {
   const snapshot = await getDocs(collection(db, 'communityLinks'));
   
-  const defaultData: Omit<CommunityLinkData, 'id'>[] = [
-    {
-        name: "WhatsApp Group",
-        description: "Join our interactive community group to discuss strategies, share insights, and connect with other traders.",
-        url: "https://chat.whatsapp.com/yourgroupinvite",
-        cta: "Join Group",
-        icon: "MessageCircle"
-    },
-    {
-        name: "WhatsApp Channel",
-        description: "Subscribe to our channel for important announcements, market updates, and exclusive content from our analysts.",
-        url: "https://whatsapp.com/channel/yourchannelinvite",
-        cta: "Subscribe to Channel",
-        icon: "Rss"
-    }
-  ];
-
-  if (snapshot.empty) {
-    // If the collection doesn't exist or is empty, save the default data.
-    const batch = writeBatch(db);
-    const createdDocs: CommunityLinkData[] = [];
-    for (const link of defaultData) {
-        const docRef = doc(collection(db, "communityLinks"));
-        batch.set(docRef, link);
-        createdDocs.push({ id: docRef.id, ...link });
-    }
-    await batch.commit();
-    return createdDocs;
-  }
-
   const data = snapshot.docs.map(doc => ({
     id: doc.id,
     ...doc.data()
