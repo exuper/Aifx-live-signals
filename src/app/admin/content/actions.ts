@@ -23,50 +23,25 @@ const formSchema = z.object({
 export type CommunityLinkData = z.infer<typeof communityLinkSchema>;
 export type CommunityLinksFormData = z.infer<typeof formSchema>;
 
-const defaultLinks: Omit<CommunityLinkData, 'id'>[] = [
-    {
-        name: "WhatsApp Group",
-        description: "Join our interactive community group to discuss strategies, share insights, and connect with other traders.",
-        url: "https://chat.whatsapp.com/yourgroupinvite",
-        cta: "Join Group",
-        icon: "MessageCircle"
-    },
-    {
-        name: "WhatsApp Channel",
-        description: "Subscribe to our channel for important announcements, market updates, and exclusive content from our analysts.",
-        url: "https://whatsapp.com/channel/yourchannelinvite",
-        cta: "Subscribe to Channel",
-        icon: "Rss"
-    }
-];
-
 // Fetches the current community links from Firestore
 export async function getCommunityLinks(): Promise<CommunityLinkData[]> {
-  const linksCollectionRef = collection(db, 'communityLinks');
-  const snapshot = await getDocs(linksCollectionRef);
-  
-  if (snapshot.empty) {
-    // If no links exist, create the default ones and return them
-    const batch = writeBatch(db);
-    const createdLinks: CommunityLinkData[] = [];
-    defaultLinks.forEach(linkData => {
-        const newDocRef = doc(linksCollectionRef);
-        batch.set(newDocRef, linkData);
-        createdLinks.push({ id: newDocRef.id, ...linkData });
-    });
-    await batch.commit();
-    return createdLinks;
+  try {
+    const linksCollectionRef = collection(db, 'communityLinks');
+    const snapshot = await getDocs(linksCollectionRef);
+
+    const data = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    } as CommunityLinkData));
+
+    // Sort to maintain a consistent order if needed, e.g., by name
+    data.sort((a, b) => a.name.localeCompare(b.name));
+
+    return data;
+  } catch (error) {
+      console.error("Error fetching community links:", error);
+      throw new Error("Could not fetch links from the database.");
   }
-
-  const data = snapshot.docs.map(doc => ({
-    id: doc.id,
-    ...doc.data()
-  } as CommunityLinkData));
-
-  // Sort to maintain a consistent order if needed, e.g., by name
-  data.sort((a, b) => a.name.localeCompare(b.name));
-
-  return data;
 }
 
 // Replaces all community links with the new set from the form

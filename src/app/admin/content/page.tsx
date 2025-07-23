@@ -31,6 +31,23 @@ const formSchema = z.object({
   links: z.array(communityLinkSchema),
 });
 
+const defaultLinks: Omit<CommunityLinkData, 'id'>[] = [
+    {
+        name: "WhatsApp Group",
+        description: "Join our interactive community group to discuss strategies, share insights, and connect with other traders.",
+        url: "https://chat.whatsapp.com/yourgroupinvite",
+        cta: "Join Group",
+        icon: "MessageCircle"
+    },
+    {
+        name: "WhatsApp Channel",
+        description: "Subscribe to our channel for important announcements, market updates, and exclusive content from our analysts.",
+        url: "https://whatsapp.com/channel/yourchannelinvite",
+        cta: "Subscribe to Channel",
+        icon: "Rss"
+    }
+];
+
 export default function ManageContentPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -52,7 +69,13 @@ export default function ManageContentPage() {
       setIsLoading(true);
       try {
         const data = await getCommunityLinks();
-        reset({ links: data });
+        if (data && data.length > 0) {
+            reset({ links: data });
+        } else {
+            // If no data, set the form with default links
+            const linksWithIds = defaultLinks.map(link => ({...link, id: `new_${Date.now()}_${Math.random()}`}));
+            reset({ links: linksWithIds });
+        }
       } catch (error) {
         toast({
           title: "Error loading content",
