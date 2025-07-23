@@ -3,7 +3,7 @@
 
 import { z } from 'zod';
 import { db } from '@/lib/firebase';
-import { collection, doc, getDocs, writeBatch, addDoc } from 'firebase/firestore';
+import { collection, doc, getDocs, writeBatch, addDoc, deleteDoc } from 'firebase/firestore';
 
 // Schema for a single community link when receiving data from the form
 const communityLinkSchema = z.object({
@@ -48,29 +48,23 @@ export async function getCommunityLinks(): Promise<CommunityLinkData[]> {
   }
 }
 
-// Replaces all community links with the new set from the form
+// Brute force update: delete all, then recreate all, one by one.
 export async function updateCommunityLinks(data: CommunityLinksFormData) {
   const validatedData = formSchema.parse(data);
-
-  const batch = writeBatch(db);
   const linksCollectionRef = collection(db, 'communityLinks');
 
   try {
-    // 1. Get all existing links and delete them
+    // 1. Get all existing links and delete them individually
     const existingLinksSnapshot = await getDocs(linksCollectionRef);
-    existingLinksSnapshot.forEach(doc => {
-      batch.delete(doc.ref);
-    });
+    for (const doc of existingLinksSnapshot.docs) {
+      await deleteDoc(doc.ref);
+    }
 
-    // 2. Add all links from the form as new documents
-    validatedData.links.forEach(link => {
-      const { id, ...linkData } = link; // Exclude the temporary ID from the data
-      const newDocRef = doc(linksCollectionRef); // Create a new document reference with a new ID
-      batch.set(newDocRef, linkData);
-    });
-
-    // 3. Commit the atomic operation
-    await batch.commit();
+    // 2. Add all links from the form as new documents individually
+    for (const link of validatedData.links) {
+        const { id, ...linkData } = link; // Exclude the temporary ID from the data
+        await addDoc(linksCollectionRef, linkData);
+    }
 
   } catch (error) {
     console.error("Error updating community links:", error);
