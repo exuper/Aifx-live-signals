@@ -3,7 +3,7 @@
 
 import { z } from 'zod';
 import { db } from '@/lib/firebase';
-import { collection, doc, getDocs, writeBatch, addDoc } from 'firebase/firestore';
+import { collection, doc, getDocs, writeBatch } from 'firebase/firestore';
 
 // Schema for a single community link when receiving data from the form
 const communityLinkSchema = z.object({
