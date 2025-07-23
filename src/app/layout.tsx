@@ -2,11 +2,11 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
-import { SidebarProvider } from '@/components/ui/sidebar';
 import { Header } from '@/components/layout/header';
 import { AnimatedBackground } from '@/components/layout/animated-background';
 import { BottomNav } from '@/components/layout/bottom-nav';
 import { getThemeData } from '@/app/admin/theme/actions';
+import { AuthProvider } from '@/hooks/use-auth';
 
 export const metadata: Metadata = {
   title: 'AI Forex Signals Live',
@@ -48,7 +48,7 @@ export default async function RootLayout({
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
       </head>
       <body className="font-body antialiased min-h-screen">
-        <SidebarProvider>
+        <AuthProvider>
             <AnimatedBackground />
             <div className="flex flex-col min-h-screen">
               <Header />
@@ -57,7 +57,7 @@ export default async function RootLayout({
               </main>
               <BottomNav />
             </div>
-        </SidebarProvider>
+        </AuthProvider>
         <Toaster />
       </body>
     </html>
