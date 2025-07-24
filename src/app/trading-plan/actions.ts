@@ -2,16 +2,12 @@
 'use server';
 
 import { generateTradingPlan, GenerateTradingPlanInput, GenerateTradingPlanOutput } from "@/ai/flows/generate-trading-plan";
-import { auth } from '@/lib/firebase';
 
 export async function generateTradingPlanAction(
   input: GenerateTradingPlanInput
 ): Promise<GenerateTradingPlanOutput> {
-  const user = auth.currentUser;
-  
-  if (!user) {
-    throw new Error("You must be logged in to generate a trading plan.");
-  }
+  // The user authentication is handled by the layout.tsx,
+  // which ensures only logged-in users can access this page and its actions.
   
   try {
     const result = await generateTradingPlan(input);
