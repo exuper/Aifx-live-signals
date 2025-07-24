@@ -14,13 +14,16 @@ const paymentSchema = z.object({
   priceAmount: z.coerce.number(),
   paymentMethod: z.string(),
   senderName: z.string().optional(),
-  receipt: z.instanceof(File).optional(),
+  receipt: z.any().refine(file => file === undefined || (file instanceof File && file.size > 0), {
+    message: "Receipt must be a valid file.",
+  }).optional(),
 });
+
 
 export async function submitPayment(formData: FormData) {
   const rawData = Object.fromEntries(formData.entries());
   
-  // Quick fix for empty file input
+  // If no file is selected, the browser sends an empty File object. Remove it.
   if (rawData.receipt && (rawData.receipt as File).size === 0) {
       delete rawData.receipt;
   }
@@ -28,8 +31,8 @@ export async function submitPayment(formData: FormData) {
   const validatedData = paymentSchema.safeParse(rawData);
 
   if (!validatedData.success) {
-    console.error(validatedData.error);
-    return { success: false, error: 'Invalid data provided.' };
+    console.error("Zod validation error:", validatedData.error.errors);
+    return { success: false, error: 'Invalid data provided. Please check your inputs.' };
   }
 
   const { receipt, ...paymentData } = validatedData.data;
