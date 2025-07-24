@@ -1,5 +1,5 @@
 // Import the functions you need from the SDKs you need
-import { initializeApp, getApps } from "firebase/app";
+import { initializeApp, getApps, getApp, FirebaseApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
@@ -14,14 +14,15 @@ const firebaseConfig = {
   appId: "1:513364826247:web:81c256a41c6ceccc368022"
 };
 
-
-// Initialize Firebase
-let app;
-if (!getApps().length) {
-  app = initializeApp(firebaseConfig);
-} else {
-  app = getApps()[0];
+// A robust function to initialize and get the Firebase app instance
+function getFirebaseApp(): FirebaseApp {
+    if (!getApps().length) {
+        return initializeApp(firebaseConfig);
+    }
+    return getApp();
 }
+
+const app = getFirebaseApp();
 
 export const auth = getAuth(app);
 export const db = getFirestore(app);
