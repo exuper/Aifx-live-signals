@@ -3,9 +3,8 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { BarChart2, BotMessageSquare, Calendar, ShieldCheck, Users, LayoutDashboard, Link as LinkIcon } from 'lucide-react';
+import { BarChart2, BotMessageSquare, Calendar, ShieldCheck, Users, LayoutDashboard } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useAuth } from '@/hooks/use-auth';
 
 const navItems = [
   { href: '/', icon: BarChart2, label: 'Signals' },
@@ -13,13 +12,11 @@ const navItems = [
   { href: '/calendar', icon: Calendar, label: 'Calendar' },
   { href: '/premium', icon: ShieldCheck, label: 'Premium' },
   { href: '/community', icon: Users, label: 'Community' },
+  { href: '/admin', icon: LayoutDashboard, label: 'Admin' },
 ];
-
-const adminNavItem = { href: '/admin', icon: LayoutDashboard, label: 'Admin' };
 
 export function BottomNav() {
   const pathname = usePathname();
-  const { user } = useAuth();
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 flex justify-around p-2 border-t bg-background/80 backdrop-blur-sm md:hidden">
@@ -28,7 +25,7 @@ export function BottomNav() {
           <div
             className={cn(
               'flex flex-col items-center justify-center w-16 h-16 rounded-lg transition-colors',
-              pathname === item.href
+              pathname.startsWith(item.href) && item.href !== '/' || pathname === item.href
                 ? 'bg-primary/20 text-primary'
                 : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
             )}
@@ -38,19 +35,6 @@ export function BottomNav() {
           </div>
         </Link>
       ))}
-       <Link href={adminNavItem.href} key={adminNavItem.href} passHref>
-          <div
-            className={cn(
-              'flex flex-col items-center justify-center w-16 h-16 rounded-lg transition-colors',
-              pathname.startsWith(adminNavItem.href)
-                ? 'bg-primary/20 text-primary'
-                : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-            )}
-          >
-            <adminNavItem.icon className="w-6 h-6 mb-1" />
-            <span className="text-xs">{adminNavItem.label}</span>
-          </div>
-        </Link>
     </nav>
   );
 }
