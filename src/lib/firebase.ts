@@ -9,20 +9,13 @@ const firebaseConfig = {
   apiKey: "AIzaSyBlogQotFEGSgDqgjIZXpggyYLIdcS2mDI",
   authDomain: "ai-forex-signals-live.firebaseapp.com",
   projectId: "ai-forex-signals-live",
-  storageBucket: "ai-forex-signals-live.firebasestorage.app",
+  storageBucket: "ai-forex-signals-live.appspot.com",
   messagingSenderId: "513364826247",
   appId: "1:513364826247:web:81c256a41c6ceccc368022"
 };
 
 // A robust function to initialize and get the Firebase app instance
-function getFirebaseApp(): FirebaseApp {
-    if (!getApps().length) {
-        return initializeApp(firebaseConfig);
-    }
-    return getApp();
-}
-
-const app = getFirebaseApp();
+const app: FirebaseApp = getApps().length ? getApp() : initializeApp(firebaseConfig);
 
 export const auth = getAuth(app);
 export const db = getFirestore(app);
