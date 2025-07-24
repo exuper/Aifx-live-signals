@@ -1,7 +1,7 @@
 
 'use client';
 
-import { BarChart2, BotMessageSquare, Calendar, ShieldCheck, Users, LayoutDashboard, Settings, Link as LinkIcon, Palette, Network, DollarSign } from "lucide-react";
+import { BarChart2, BotMessageSquare, Calendar, ShieldCheck, Users, LayoutDashboard, Settings, Link as LinkIcon, Palette, Network, DollarSign, FileText } from "lucide-react";
 import { SidebarHeader, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarMenuSub, SidebarMenuSubItem, SidebarMenuSubButton } from "../ui/sidebar";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
@@ -10,6 +10,7 @@ import { AppLogo } from "./app-logo";
 const navItems = [
   { href: '/', icon: BarChart2, label: 'Live Signals' },
   { href: '/analysis', icon: BotMessageSquare, label: 'Chart Analysis' },
+  { href: '/trading-plan', icon: FileText, label: 'Trading Plan' },
   { href: '/calendar', icon: Calendar, label: 'Economic Calendar' },
   { href: '/premium', icon: ShieldCheck, label: 'Premium / VIP' },
   { href: '/community', icon: Users, label: 'Community' },

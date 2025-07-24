@@ -3,12 +3,13 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { BarChart2, BotMessageSquare, Calendar, ShieldCheck, Users } from 'lucide-react';
+import { BarChart2, BotMessageSquare, Calendar, ShieldCheck, Users, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const navItems = [
   { href: '/', icon: BarChart2, label: 'Signals' },
   { href: '/analysis', icon: BotMessageSquare, label: 'Analysis' },
+  { href: '/trading-plan', icon: FileText, label: 'Plan' },
   { href: '/calendar', icon: Calendar, label: 'Calendar' },
   { href: '/premium', icon: ShieldCheck, label: 'Premium' },
   { href: '/community', icon: Users, label: 'Community' },
@@ -27,12 +28,12 @@ export function BottomNav() {
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 flex justify-around p-2 border-t bg-background/80 backdrop-blur-sm md:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 grid grid-cols-6 p-1 border-t bg-background/80 backdrop-blur-sm md:hidden">
       {navItems.map((item) => (
         <Link href={item.href} key={item.href} passHref>
           <div
             className={cn(
-              'flex flex-col items-center justify-center w-16 h-16 rounded-lg transition-colors',
+              'flex flex-col items-center justify-center rounded-lg transition-colors h-16',
               getIsActive(item.href)
                 ? 'bg-primary/20 text-primary'
                 : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'

@@ -30,6 +30,7 @@ import { cn } from "@/lib/utils";
 const navItems = [
   { href: '/', label: 'Signals' },
   { href: '/analysis', label: 'Analysis' },
+  { href: '/trading-plan', label: 'Trading Plan' },
   { href: '/calendar', label: 'Calendar' },
   { href: '/premium', label: 'Premium' },
   { href: '/community', label: 'Community' },
