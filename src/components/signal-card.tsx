@@ -1,7 +1,8 @@
 import { Signal } from "@/lib/mock-data";
 import { Card, CardContent } from "./ui/card";
 import { cn } from "@/lib/utils";
-import { ArrowDown, ArrowUp } from "lucide-react";
+import { ArrowDown, ArrowUp, Star } from "lucide-react";
+import type { Timestamp } from "firebase/firestore";
 
 type SignalCardProps = {
   signal: Signal;
@@ -20,15 +21,15 @@ export function SignalCard({ signal }: SignalCardProps) {
   const isBuy = signal.action === 'BUY';
   const isActive = signal.status === 'Active';
 
-  const formatTimestamp = (timestamp: any) => {
+  const formatTimestamp = (timestamp: Timestamp | Date) => {
     if (!timestamp) return { date: 'N/A', time: 'N/A' };
-    const dateObj = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    const dateObj = 'toDate' in timestamp ? timestamp.toDate() : timestamp;
     const date = dateObj.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' });
     const time = dateObj.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     return { date, time };
   };
 
-  const { date, time } = formatTimestamp(signal.createdAt);
+  const { date, time } = formatTimestamp(signal.createdAt as any);
 
   return (
     <Card className={cn("flex flex-col", isActive ? "" : "opacity-60")}>
@@ -38,7 +39,10 @@ export function SignalCard({ signal }: SignalCardProps) {
                 {isBuy ? <ArrowUp className="h-5 w-5" /> : <ArrowDown className="h-5 w-5" />}
                 <span className="ml-1">{signal.action}</span>
             </div>
-            <p className="font-bold text-lg text-center font-headline">{signal.pair}</p>
+            <p className="font-bold text-lg text-center font-headline flex items-center justify-center gap-2">
+              {signal.pair}
+              {signal.isPremium && <Star className="w-4 h-4 text-yellow-400" />}
+            </p>
             <p className="font-mono text-lg">{signal.entry}</p>
         </div>
 

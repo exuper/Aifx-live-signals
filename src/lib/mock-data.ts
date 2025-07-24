@@ -11,7 +11,7 @@ export type Signal = {
   takeProfit2: number;
   status: 'Active' | 'Expired';
   isPremium?: boolean;
-  createdAt: Timestamp;
+  createdAt: Timestamp | Date;
 };
 
 export type CalendarEvent = {

@@ -8,7 +8,7 @@ import { PageHeader } from '@/components/page-header';
 import { ContentLock } from '@/components/layout/content-lock';
 import { SignalCard } from '@/components/signal-card';
 import { Signal } from '@/lib/mock-data';
-import { collection, onSnapshot, orderBy, query, where } from 'firebase/firestore';
+import { collection, onSnapshot, orderBy, query, where, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -28,9 +28,9 @@ export default function PremiumSignalsPage() {
     const isLoading = authLoading || subLoading || contentLoading;
 
     useEffect(() => {
-        // Only fetch signals if the user is authenticated, to avoid unnecessary reads.
+        if (authLoading || subLoading) return;
+        
         if (user && hasSubscription(service.id)) {
-            // Query for signals that ARE premium
             const q = query(
                 collection(db, "signals"), 
                 where("isPremium", "==", true),
@@ -39,7 +39,12 @@ export default function PremiumSignalsPage() {
             const unsubscribe = onSnapshot(q, (querySnapshot) => {
                 const signalsData: Signal[] = [];
                 querySnapshot.forEach((doc) => {
-                    signalsData.push({ id: doc.id, ...doc.data() } as Signal);
+                    const data = doc.data();
+                    signalsData.push({ 
+                      id: doc.id, 
+                      ...data,
+                      createdAt: data.createdAt instanceof Timestamp ? data.createdAt : Timestamp.now()
+                    } as Signal);
                 });
                 setSignals(signalsData);
                 setContentLoading(false);
@@ -52,7 +57,7 @@ export default function PremiumSignalsPage() {
         } else {
             setContentLoading(false);
         }
-    }, [user, hasSubscription]);
+    }, [user, hasSubscription, authLoading, subLoading]);
 
     if (isLoading) {
         return (

@@ -7,7 +7,7 @@ import { SignalCard } from "@/components/signal-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Signal } from "@/lib/mock-data";
 import { db } from '@/lib/firebase';
-import { collection, onSnapshot, orderBy, query, where } from 'firebase/firestore';
+import { collection, onSnapshot, orderBy, query, where, Timestamp } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Home() {
@@ -24,7 +24,12 @@ export default function Home() {
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const signalsData: Signal[] = [];
       querySnapshot.forEach((doc) => {
-        signalsData.push({ id: doc.id, ...doc.data() } as Signal);
+        const data = doc.data();
+        signalsData.push({ 
+          id: doc.id, 
+          ...data,
+          createdAt: data.createdAt instanceof Timestamp ? data.createdAt : Timestamp.now()
+        } as Signal);
       });
       setSignals(signalsData);
       setIsLoading(false);
@@ -54,7 +59,7 @@ export default function Home() {
         <TabsContent value="active">
           {isLoading ? (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mt-4">
-              {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-[280px] w-full" />)}
+              {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-[150px] w-full" />)}
             </div>
           ) : activeSignals.length > 0 ? (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mt-4">
@@ -71,7 +76,7 @@ export default function Home() {
         <TabsContent value="expired">
            {isLoading ? (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mt-4">
-              {[...Array(6)].map((_, i) => <Skeleton key={i} className="h-[280px] w-full" />)}
+              {[...Array(6)].map((_, i) => <Skeleton key={i} className="h-[150px] w-full" />)}
             </div>
           ) : expiredSignals.length > 0 ? (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mt-4">
