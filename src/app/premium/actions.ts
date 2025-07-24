@@ -1,64 +1,65 @@
 
 'use server';
 
-import { z } from 'zod';
 import { db, storage } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
-const paymentSchema = z.object({
-  userId: z.string(),
-  userEmail: z.string(),
-  serviceId: z.string(),
-  serviceTitle: z.string(),
-  priceAmount: z.coerce.number(),
-  paymentMethod: z.string(),
-  senderName: z.string().optional(),
-  // Receipt is handled separately now
-});
-
+// We will not use Zod here to avoid FormData parsing complexities.
+// Validation will be done manually.
 
 export async function submitPayment(formData: FormData) {
-  const rawData = {
-      userId: formData.get('userId'),
-      userEmail: formData.get('userEmail'),
-      serviceId: formData.get('serviceId'),
-      serviceTitle: formData.get('serviceTitle'),
-      priceAmount: formData.get('priceAmount'),
-      paymentMethod: formData.get('paymentMethod'),
-      senderName: formData.get('senderName') || undefined,
-  };
-
-  const validatedData = paymentSchema.safeParse(rawData);
-  const receiptFile = formData.get('receipt') as File | null;
-
-  if (!validatedData.success) {
-    console.error("Zod validation error:", validatedData.error.errors);
-    return { success: false, error: 'Invalid data provided. Please check your inputs.' };
-  }
-
-  const paymentData = validatedData.data;
-
   try {
+    const userId = formData.get('userId') as string;
+    const userEmail = formData.get('userEmail') as string;
+    const serviceId = formData.get('serviceId') as string;
+    const serviceTitle = formData.get('serviceTitle') as string;
+    const priceAmount = Number(formData.get('priceAmount'));
+    const paymentMethod = formData.get('paymentMethod') as string;
+    const senderName = formData.get('senderName') as string | undefined;
+    const receiptFile = formData.get('receipt') as File | null;
+
+    // Manual validation
+    if (!userId || !userEmail || !serviceId || !serviceTitle || !priceAmount || !paymentMethod) {
+        throw new Error('Invalid data provided. Please check your inputs.');
+    }
+
     let receiptUrl: string | undefined = undefined;
 
-    // Check if a valid file was uploaded
+    // Handle file upload
     if (receiptFile && receiptFile.size > 0) {
         const storageRef = ref(storage, `receipts/${Date.now()}_${receiptFile.name}`);
         const snapshot = await uploadBytes(storageRef, receiptFile);
         receiptUrl = await getDownloadURL(snapshot.ref);
     }
 
-    await addDoc(collection(db, 'payments'), {
-      ...paymentData,
-      receiptUrl,
-      status: 'pending', // All submissions are pending until manually verified
+    // Prepare data for Firestore
+    const paymentData: any = {
+      userId,
+      userEmail,
+      serviceId,
+      serviceTitle,
+      priceAmount,
+      paymentMethod,
+      status: 'pending',
       createdAt: serverTimestamp(),
-    });
+    };
+
+    if (senderName) {
+      paymentData.senderName = senderName;
+    }
+    if (receiptUrl) {
+      paymentData.receiptUrl = receiptUrl;
+    }
+
+    // Add document to Firestore
+    await addDoc(collection(db, 'payments'), paymentData);
 
     return { success: true };
   } catch (error) {
     console.error("Error submitting payment:", error);
-    return { success: false, error: "Could not save payment submission." };
+    // Return a more specific error if possible, otherwise generic.
+    const errorMessage = error instanceof Error ? error.message : "Could not save payment submission.";
+    return { success: false, error: errorMessage };
   }
 }
