@@ -8,7 +8,7 @@ import { PageHeader } from '@/components/page-header';
 import { ContentLock } from '@/components/layout/content-lock';
 import { SignalCard } from '@/components/signal-card';
 import { Signal } from '@/lib/mock-data';
-import { collection, onSnapshot, orderBy, query, Timestamp } from 'firebase/firestore';
+import { collection, onSnapshot, orderBy, query, Timestamp, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -25,27 +25,27 @@ export default function PremiumSignalsPage() {
     const [signals, setSignals] = useState<Signal[]>([]);
     const [contentLoading, setContentLoading] = useState(true);
     
-    const isLoading = authLoading || subLoading || contentLoading;
+    const isLoading = authLoading || subLoading;
 
     useEffect(() => {
-        if (authLoading || subLoading) return;
+        if (isLoading) return;
         
         if (user && hasSubscription(service.id)) {
+            setContentLoading(true);
             const q = query(
                 collection(db, "signals"), 
+                where("isPremium", "==", true),
                 orderBy("createdAt", "desc")
             );
             const unsubscribe = onSnapshot(q, (querySnapshot) => {
                 const signalsData: Signal[] = [];
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
-                    if (data.isPremium === true) {
-                        signalsData.push({ 
-                          id: doc.id, 
-                          ...data,
-                          createdAt: data.createdAt instanceof Timestamp ? data.createdAt : Timestamp.now()
-                        } as Signal);
-                    }
+                    signalsData.push({ 
+                        id: doc.id, 
+                        ...data,
+                        createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate() : new Date()
+                    } as Signal);
                 });
                 setSignals(signalsData);
                 setContentLoading(false);
@@ -58,7 +58,7 @@ export default function PremiumSignalsPage() {
         } else {
             setContentLoading(false);
         }
-    }, [user, hasSubscription, authLoading, subLoading]);
+    }, [user, hasSubscription, isLoading]);
 
     if (isLoading) {
         return (

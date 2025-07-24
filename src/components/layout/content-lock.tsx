@@ -43,18 +43,18 @@ export function ContentLock({ service }: ContentLockProps) {
 
         setIsSubmitting(true);
         try {
-            const result = await redeemAccessCode(user.uid, user.email!, { code });
+            const result = await redeemAccessCode(user.uid, user.email!);
             if (result.success && result.serviceId) {
-                toast({ title: "Success!", description: `You now have access to ${service.title}. Refreshing...`});
+                toast({ title: "Success!", description: `You now have access to ${service.title}. The page will now reload.`});
                 // Force a reload to re-check subscription status from the server
-                window.location.reload();
+                setTimeout(() => window.location.reload(), 1500);
             } else {
                 toast({ title: "Redemption Failed", description: result.error, variant: "destructive" });
+                 setIsSubmitting(false);
             }
         } catch (error: any) {
             toast({ title: "Error", description: error.message || "An unknown error occurred.", variant: "destructive" });
-        } finally {
-            setIsSubmitting(false);
+             setIsSubmitting(false);
         }
     };
 
