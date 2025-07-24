@@ -3,7 +3,7 @@
 
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { DollarSign, Users, BarChart2, Loader2, Link as LinkIcon, Calendar, Palette, Network, KeyRound, Crown, ShieldCheck } from "lucide-react";
+import { DollarSign, Users, BarChart2, Loader2, Link as LinkIcon, Calendar, Palette, Network, KeyRound, Crown, ShieldCheck, Megaphone } from "lucide-react";
 import { Button } from '@/components/ui/button';
 import { auth } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
@@ -16,6 +16,13 @@ const adminFeatures = [
     description: "Create, update, and expire trading signals.",
     icon: BarChart2,
     href: "/admin/signals",
+    isExternal: false,
+  },
+  {
+    title: "Manage Alerts",
+    description: "Send announcements and notifications to users.",
+    icon: Megaphone,
+    href: "/admin/alerts",
     isExternal: false,
   },
   {

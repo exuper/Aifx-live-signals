@@ -1,7 +1,7 @@
 
 'use client';
 
-import { BarChart2, BotMessageSquare, Calendar, ShieldCheck, Users, LayoutDashboard, Settings, Link as LinkIcon, Palette, Network, DollarSign, FileText, KeyRound, Crown } from "lucide-react";
+import { BarChart2, BotMessageSquare, Calendar, ShieldCheck, Users, LayoutDashboard, Settings, Link as LinkIcon, Palette, Network, DollarSign, FileText, KeyRound, Crown, Megaphone } from "lucide-react";
 import { SidebarHeader, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarMenuSub, SidebarMenuSubItem, SidebarMenuSubButton } from "../ui/sidebar";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
@@ -19,6 +19,7 @@ const navItems = [
 const adminItems = [
     { href: '/admin', icon: LayoutDashboard, label: 'Dashboard', exact: true },
     { href: '/admin/signals', icon: BarChart2, label: 'Manage Signals' },
+    { href: '/admin/alerts', icon: Megaphone, label: 'Manage Alerts' },
     { href: '/admin/calendar', icon: Calendar, label: 'Manage Calendar' },
     { href: '/admin/content', icon: LinkIcon, label: 'Manage Content' },
     { href: '/admin/premium-content', icon: Crown, label: 'Premium Content' },

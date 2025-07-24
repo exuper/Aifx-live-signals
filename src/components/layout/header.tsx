@@ -25,6 +25,10 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet"
 import { cn } from "@/lib/utils";
+import { useEffect, useState } from "react";
+import { collection, onSnapshot, orderBy, query, Timestamp } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { formatDistanceToNow } from "date-fns";
 
 
 const navItems = [
@@ -60,6 +64,71 @@ function DesktopNav() {
     );
 }
 
+interface Alert {
+  id: string;
+  title: string;
+  message: string;
+  createdAt: Timestamp;
+}
+
+function AlertPopover() {
+    const [alerts, setAlerts] = useState<Alert[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const q = query(collection(db, "alerts"), orderBy("createdAt", "desc"));
+        const unsubscribe = onSnapshot(q, (querySnapshot) => {
+            const alertsData: Alert[] = [];
+            querySnapshot.forEach((doc) => {
+                alertsData.push({ id: doc.id, ...doc.data() } as Alert);
+            });
+            setAlerts(alertsData);
+            setIsLoading(false);
+        }, (error) => {
+            console.error("Error fetching alerts:", error);
+            setIsLoading(false);
+        });
+
+        return () => unsubscribe();
+    }, []);
+
+    return (
+        <Popover>
+            <PopoverTrigger asChild>
+                <Button variant="ghost" size="icon">
+                    <Bell className="h-5 w-5" />
+                    <span className="sr-only">Toggle alerts</span>
+                </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80" align="end">
+                <div className="grid gap-4">
+                    <div className="space-y-2">
+                        <h4 className="font-medium leading-none font-headline">Alerts</h4>
+                        <p className="text-sm text-muted-foreground">
+                           Recent announcements and updates.
+                        </p>
+                    </div>
+                     <div className="grid gap-2 max-h-80 overflow-y-auto">
+                        {isLoading ? (
+                            <Skeleton className="h-20 w-full" />
+                        ) : alerts.length === 0 ? (
+                            <p className="text-sm text-muted-foreground text-center py-4">No new notifications.</p>
+                        ) : (
+                           alerts.map(alert => (
+                                <div key={alert.id} className="p-3 rounded-lg border bg-secondary/50">
+                                    <p className="font-semibold text-sm">{alert.title}</p>
+                                    <p className="text-xs text-muted-foreground">{alert.message}</p>
+                                    <p className="text-xs text-muted-foreground/70 mt-1">{formatDistanceToNow(alert.createdAt.toDate(), { addSuffix: true })}</p>
+                                </div>
+                           ))
+                        )}
+                    </div>
+                </div>
+            </PopoverContent>
+        </Popover>
+    )
+}
+
 export function Header() {
   const { user, loading } = useAuth();
   const router = useRouter();
@@ -81,25 +150,7 @@ export function Header() {
     if (user) {
       return (
         <div className="flex items-center gap-2">
-           <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <Bell className="h-5 w-5" />
-                <span className="sr-only">Toggle alerts</span>
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-80">
-              <div className="grid gap-4">
-                <div className="space-y-2">
-                  <h4 className="font-medium leading-none font-headline">Alerts</h4>
-                  <p className="text-sm text-muted-foreground">
-                    You have no new notifications.
-                  </p>
-                </div>
-              </div>
-            </PopoverContent>
-          </Popover>
-
+          <AlertPopover />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="rounded-full">
