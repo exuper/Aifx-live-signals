@@ -19,6 +19,12 @@ const paymentSchema = z.object({
 
 export async function submitPayment(formData: FormData) {
   const rawData = Object.fromEntries(formData.entries());
+  
+  // Quick fix for empty file input
+  if (rawData.receipt && (rawData.receipt as File).size === 0) {
+      delete rawData.receipt;
+  }
+
   const validatedData = paymentSchema.safeParse(rawData);
 
   if (!validatedData.success) {

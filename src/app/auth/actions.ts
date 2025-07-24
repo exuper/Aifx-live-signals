@@ -2,9 +2,10 @@
 'use server';
 
 import { z } from 'zod';
-import { auth } from '@/lib/firebase';
+import { auth, db } from '@/lib/firebase';
 import { createUserWithEmailAndPassword, signOut } from 'firebase/auth';
 import { FirebaseError } from 'firebase/app';
+import { doc, setDoc } from 'firebase/firestore';
 
 const signupSchema = z.object({
   email: z.string().email(),
@@ -20,6 +21,14 @@ export async function handleSignUp(data: z.infer<typeof signupSchema>) {
       validatedData.email,
       validatedData.password
     );
+    
+    // Create a user document in Firestore
+    await setDoc(doc(db, 'users', userCredential.user.uid), {
+      email: userCredential.user.email,
+      createdAt: new Date(),
+      subscriptions: {}, // Initialize with no subscriptions
+    });
+
     return { success: true, userId: userCredential.user.uid };
   } catch (error) {
     if (error instanceof FirebaseError) {

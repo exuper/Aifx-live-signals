@@ -13,6 +13,7 @@ import { getAppearanceData } from '@/app/admin/appearance/actions';
 import { AuthProvider } from '@/hooks/use-auth';
 import { cn } from '@/lib/utils';
 import { fontMap } from '@/lib/fonts';
+import { SubscriptionProvider } from '@/hooks/use-subscription';
 
 export const metadata: Metadata = {
   title: 'AI Forex Signals Live',
@@ -72,6 +73,7 @@ export default async function RootLayout({
       </head>
       <body className={cn("font-body antialiased min-h-screen", fontBody.className, fontHeadline.className)}>
         <AuthProvider>
+          <SubscriptionProvider>
             <SelectedBackground />
             <div className="flex flex-col min-h-screen">
               <Header />
@@ -80,6 +82,7 @@ export default async function RootLayout({
               </main>
               <BottomNav />
             </div>
+          </SubscriptionProvider>
         </AuthProvider>
         <Toaster />
       </body>
