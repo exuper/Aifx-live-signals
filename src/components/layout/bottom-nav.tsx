@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { BarChart2, BotMessageSquare, Calendar, ShieldCheck, Users, LayoutDashboard, Link as LinkIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/hooks/use-auth';
 
 const navItems = [
   { href: '/', icon: BarChart2, label: 'Signals' },
@@ -18,6 +19,7 @@ const adminNavItem = { href: '/admin', icon: LayoutDashboard, label: 'Admin' };
 
 export function BottomNav() {
   const pathname = usePathname();
+  const { user } = useAuth();
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 flex justify-around p-2 border-t bg-background/80 backdrop-blur-sm md:hidden">
