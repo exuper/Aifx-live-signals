@@ -1,7 +1,7 @@
 
 'use client';
 
-import { Bell, LogOut, Menu } from "lucide-react";
+import { Bell, LogOut, Menu, LayoutDashboard } from "lucide-react";
 import { Button } from "../ui/button";
 import { AppLogo } from "./app-logo";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
@@ -80,6 +80,12 @@ export function Header() {
     if (user) {
       return (
         <div className="flex items-center gap-2">
+           <Button variant="ghost" asChild>
+                <Link href="/admin">
+                    <LayoutDashboard className="mr-2"/>
+                    Admin Dashboard
+                </Link>
+           </Button>
            <Popover>
             <PopoverTrigger asChild>
               <Button variant="ghost" size="icon">
