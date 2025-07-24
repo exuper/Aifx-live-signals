@@ -1,7 +1,7 @@
 
 'use client';
 
-import { Bell, LogOut, Menu } from "lucide-react";
+import { Bell, LogOut, Menu, User, CreditCard } from "lucide-react";
 import { Button } from "../ui/button";
 import { AppLogo } from "./app-logo";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
@@ -112,8 +112,18 @@ export function Header() {
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem disabled>Profile</DropdownMenuItem>
-              <DropdownMenuItem disabled>Billing</DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/account/profile">
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Profile</span>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/account/billing">
+                    <CreditCard className="mr-2 h-4 w-4" />
+                    <span>Billing</span>
+                </Link>
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={onSignOut}>
                 <LogOut className="mr-2 h-4 w-4" />
