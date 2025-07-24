@@ -6,15 +6,15 @@ import { getStorage } from "firebase/storage";
 
 // Your web app's Firebase configuration
 // IMPORTANT: This is not a recommended practice for production.
-// Credentials are hardcoded here as a last resort to fix a persistent
-// environment configuration issue.
+// Credentials are hardcoded here to resolve a persistent environment configuration issue.
 const firebaseConfig = {
-  projectId: "ai-forex-signals-live",
-  appId: "1:1095034676935:web:271424e469500918961a86",
-  storageBucket: "ai-forex-signals-live.appspot.com",
   apiKey: "REDACTED_API_KEY",
   authDomain: "ai-forex-signals-live.firebaseapp.com",
+  projectId: "ai-forex-signals-live",
+  storageBucket: "ai-forex-signals-live.appspot.com",
   messagingSenderId: "1095034676935",
+  appId: "1:1095034676935:web:271424e469500918961a86",
+  databaseURL: "https://ai-forex-signals-live.firebaseio.com"
 };
 
 // Initialize Firebase
