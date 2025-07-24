@@ -1,7 +1,7 @@
 
 'use client';
 
-import { BarChart2, BotMessageSquare, Calendar, ShieldCheck, Users, LayoutDashboard, Settings, Link as LinkIcon, Palette, Network, DollarSign, FileText } from "lucide-react";
+import { BarChart2, BotMessageSquare, Calendar, ShieldCheck, Users, LayoutDashboard, Settings, Link as LinkIcon, Palette, Network, DollarSign, FileText, KeyRound } from "lucide-react";
 import { SidebarHeader, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarMenuSub, SidebarMenuSubItem, SidebarMenuSubButton } from "../ui/sidebar";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
@@ -23,6 +23,7 @@ const adminItems = [
     { href: '/admin/content', icon: LinkIcon, label: 'Manage Content' },
     { href: '/admin/appearance', icon: Palette, label: 'Appearance' },
     { href: '/admin/gateways', icon: Network, label: 'Payment Gateways' },
+    { href: '/admin/codes', icon: KeyRound, label: 'Manage Codes' },
     { href: '/admin/payments', icon: DollarSign, label: 'View Payments' },
 ]
 

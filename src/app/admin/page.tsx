@@ -3,7 +3,7 @@
 
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { DollarSign, Users, BarChart2, Loader2, Link as LinkIcon, Calendar, Palette, Network } from "lucide-react";
+import { DollarSign, Users, BarChart2, Loader2, Link as LinkIcon, Calendar, Palette, Network, KeyRound } from "lucide-react";
 import { Button } from '@/components/ui/button';
 import { auth } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
@@ -44,6 +44,13 @@ const adminFeatures = [
     description: "Configure your payment provider details.",
     icon: Network,
     href: "/admin/gateways",
+    isExternal: false,
+  },
+   {
+    title: "Manage Codes",
+    description: "Generate access codes for premium services.",
+    icon: KeyRound,
+    href: "/admin/codes",
     isExternal: false,
   },
   {

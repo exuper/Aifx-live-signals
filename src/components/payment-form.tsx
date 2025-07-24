@@ -91,7 +91,7 @@ export function PaymentForm({ service }: PaymentFormProps) {
         if (result.success) {
             toast({
                 title: 'Payment Submitted!',
-                description: `Your payment for ${service.title} is being processed. You will be notified upon approval.`,
+                description: `Your payment for ${service.title} is being processed. Please contact an admin with your transaction details to receive your access code.`,
             });
             setIsSubmitted(true);
         } else {
@@ -111,16 +111,15 @@ export function PaymentForm({ service }: PaymentFormProps) {
   
   if (isSubmitted) {
       return (
-          <Card className="max-w-lg mx-auto">
+          <Card className="max-w-lg mx-auto bg-transparent border-none shadow-none">
               <CardHeader className="text-center">
                   <CardTitle className="font-headline text-2xl">Submission Received!</CardTitle>
                   <CardDescription>
-                      Your payment submission for "{service.title}" has been received. Our team will review it shortly. You will be notified via email upon approval.
+                      Your payment submission for "{service.title}" has been received. Please contact an admin with your transaction details to get your access code.
                   </CardDescription>
               </CardHeader>
               <CardContent className="flex flex-col items-center gap-4">
-                  <p className="text-sm text-muted-foreground">This may take up to 24 hours.</p>
-                  <Button onClick={() => router.push('/')}>Go to Homepage</Button>
+                  <Button onClick={() => setIsSubmitted(false)}>Make Another Payment</Button>
               </CardContent>
           </Card>
       )
@@ -148,8 +147,8 @@ export function PaymentForm({ service }: PaymentFormProps) {
           )
       }
       return (
-           <Card className="bg-background/50">
-                <CardContent className="p-6 space-y-4">
+           <Card className="bg-background/50 border-none shadow-none">
+                <CardContent className="p-0 pt-6 space-y-4">
                     <p className="text-sm text-center text-muted-foreground">Send ${service.priceAmount} to one of the options below.</p>
                     <Accordion type="single" collapsible className="w-full">
                         {gateways[category].map(gateway => (
@@ -177,7 +176,7 @@ export function PaymentForm({ service }: PaymentFormProps) {
                     <ReceiptUpload id={category} />
                     <Button onClick={() => handleSubmit(type)} className="w-full" disabled={isSubmitting || (needsSenderInfo && !senderName)}>
                         {isSubmitting ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : null}
-                        I Have Paid
+                        I Have Paid, Submit for Verification
                     </Button>
                 </CardContent>
            </Card>
@@ -185,16 +184,10 @@ export function PaymentForm({ service }: PaymentFormProps) {
   }
 
   return (
-    <Tabs defaultValue="crypto" className="w-full max-w-lg mx-auto">
-      <TabsList className="grid w-full grid-cols-3">
-        <TabsTrigger value="crypto" disabled={!gateways?.crypto.length}><Bitcoin className="mr-2 h-4 w-4"/>Crypto</TabsTrigger>
-        <TabsTrigger value="transfer" disabled={!gateways?.transfer.length}><Landmark className="mr-2 h-4 w-4"/>Transfer</TabsTrigger>
-        <TabsTrigger value="mobile" disabled={!gateways?.mobile.length}><Smartphone className="mr-2 h-4 w-4"/>Mobile</TabsTrigger>
-      </TabsList>
-
+    <>
       <TabsContent value="crypto">{renderPaymentContent('crypto', 'Crypto', false)}</TabsContent>
       <TabsContent value="transfer">{renderPaymentContent('transfer', 'Transfer', true)}</TabsContent>
       <TabsContent value="mobile">{renderPaymentContent('mobile', 'Mobile Money', true)}</TabsContent>
-    </Tabs>
+    </>
   );
 }

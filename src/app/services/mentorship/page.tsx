@@ -4,9 +4,8 @@
 import { useSubscription } from '@/hooks/use-subscription';
 import { useAuth } from '@/hooks/use-auth';
 import { Loader2 } from 'lucide-react';
-import { AccessDenied } from '@/components/layout/access-denied';
 import { PageHeader } from '@/components/page-header';
-import { PaymentForm } from '@/components/payment-form';
+import { ContentLock } from '@/components/layout/content-lock';
 
 const service = {
     id: "mentorship",
@@ -27,21 +26,9 @@ export default function MentorshipPage() {
             </div>
         );
     }
-
-    if (!user) {
-        return <AccessDenied serviceTitle={service.title} />;
-    }
-
-    if (!hasSubscription(service.id)) {
-        return (
-             <div className="space-y-8">
-                <PageHeader
-                    title={`Subscribe to ${service.title}`}
-                    description="Choose a payment method below to get instant access."
-                />
-                <PaymentForm service={service} />
-            </div>
-        );
+    
+    if (!user || !hasSubscription(service.id)) {
+        return <ContentLock service={service} />;
     }
 
     return (

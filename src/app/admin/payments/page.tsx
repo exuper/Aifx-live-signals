@@ -50,9 +50,9 @@ export default function ViewPaymentsPage() {
         return () => unsubscribe();
     }, []);
 
-    const handleStatusUpdate = async (payment: Payment, status: 'pending' | 'completed') => {
+    const handleStatusUpdate = async (paymentId: string, status: 'pending' | 'completed') => {
         try {
-            await updatePaymentStatus(payment.id, payment.userId, payment.serviceId, status);
+            await updatePaymentStatus(paymentId, status);
             toast({
                 title: "Status Updated",
                 description: `Payment has been marked as ${status}.`
@@ -64,12 +64,6 @@ export default function ViewPaymentsPage() {
                 variant: "destructive"
             });
         }
-    };
-
-    const formatTimestamp = (timestamp: any) => {
-        if (!timestamp) return 'N/A';
-        const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-        return date.toLocaleString();
     };
 
     const pendingPayments = payments.filter(p => p.status === 'pending');
@@ -102,7 +96,7 @@ function PaymentTable({ title, payments, isLoading, onStatusUpdate }: {
     title: string;
     payments: Payment[];
     isLoading: boolean;
-    onStatusUpdate: (payment: Payment, status: 'pending' | 'completed') => void;
+    onStatusUpdate: (paymentId: string, status: 'pending' | 'completed') => void;
 }) {
      const formatTimestamp = (timestamp: any) => {
         if (!timestamp) return 'N/A';
@@ -169,12 +163,12 @@ function PaymentTable({ title, payments, isLoading, onStatusUpdate }: {
                                                     </DropdownMenuItem>
                                                 )}
                                                 {payment.status === 'pending' && (
-                                                    <DropdownMenuItem onClick={() => onStatusUpdate(payment, 'completed')}>
+                                                    <DropdownMenuItem onClick={() => onStatusUpdate(payment.id, 'completed')}>
                                                         Mark as Completed
                                                     </DropdownMenuItem>
                                                 )}
                                                 {payment.status === 'completed' && (
-                                                     <DropdownMenuItem onClick={() => onStatusUpdate(payment, 'pending')}>
+                                                     <DropdownMenuItem onClick={() => onStatusUpdate(payment.id, 'pending')}>
                                                         Mark as Pending
                                                     </DropdownMenuItem>
                                                 )}
