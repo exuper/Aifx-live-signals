@@ -17,6 +17,7 @@ const AnalyzeTechnicalChartInputSchema = z.object({
     .describe(
       "A photo of a technical analysis chart, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
     ),
+  userCommand: z.string().optional().describe('A specific command or question from the user to guide the analysis.'),
 });
 export type AnalyzeTechnicalChartInput = z.infer<typeof AnalyzeTechnicalChartInputSchema>;
 
@@ -39,6 +40,11 @@ const prompt = ai.definePrompt({
 You will analyze the provided technical analysis chart image and provide a summary of the key observations and potential trading signals.
 
 Consider aspects like trend lines, support and resistance levels, chart patterns, and technical indicators.
+
+{{#if userCommand}}
+The user has provided a specific command. Prioritize your analysis based on this command:
+"{{{userCommand}}}"
+{{/if}}
 
 Provide both a summary of the chart and specific trading signals that a user might take based on the analysis.
 
