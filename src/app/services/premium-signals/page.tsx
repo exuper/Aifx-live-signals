@@ -31,20 +31,24 @@ export default function PremiumSignalsPage() {
         if (authLoading || subLoading) return;
         
         if (user && hasSubscription(service.id)) {
+            // Query for all signals, ordered by creation date.
+            // Filtering for premium signals will happen on the client.
             const q = query(
                 collection(db, "signals"), 
-                where("isPremium", "==", true),
                 orderBy("createdAt", "desc")
             );
             const unsubscribe = onSnapshot(q, (querySnapshot) => {
                 const signalsData: Signal[] = [];
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
-                    signalsData.push({ 
-                      id: doc.id, 
-                      ...data,
-                      createdAt: data.createdAt instanceof Timestamp ? data.createdAt : Timestamp.now()
-                    } as Signal);
+                    // Client-side filtering for premium signals
+                    if (data.isPremium === true) {
+                        signalsData.push({ 
+                          id: doc.id, 
+                          ...data,
+                          createdAt: data.createdAt instanceof Timestamp ? data.createdAt : Timestamp.now()
+                        } as Signal);
+                    }
                 });
                 setSignals(signalsData);
                 setContentLoading(false);

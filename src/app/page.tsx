@@ -15,21 +15,24 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Query for signals that are NOT premium
+    // Query for all signals, ordered by creation date.
+    // Filtering for premium/non-premium will happen on the client.
     const q = query(
       collection(db, "signals"), 
-      where("isPremium", "==", false),
       orderBy("createdAt", "desc")
     );
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const signalsData: Signal[] = [];
       querySnapshot.forEach((doc) => {
         const data = doc.data();
-        signalsData.push({ 
-          id: doc.id, 
-          ...data,
-          createdAt: data.createdAt instanceof Timestamp ? data.createdAt : Timestamp.now()
-        } as Signal);
+        // Client-side filtering for non-premium signals
+        if (data.isPremium === false) {
+            signalsData.push({ 
+              id: doc.id, 
+              ...data,
+              createdAt: data.createdAt instanceof Timestamp ? data.createdAt : Timestamp.now()
+            } as Signal);
+        }
       });
       setSignals(signalsData);
       setIsLoading(false);
