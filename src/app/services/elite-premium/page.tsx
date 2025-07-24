@@ -5,8 +5,10 @@ import { useSubscription } from '@/hooks/use-subscription';
 import { useAuth } from '@/hooks/use-auth';
 import { Loader2 } from 'lucide-react';
 import { PageHeader } from '@/components/page-header';
-import { PaymentForm } from '@/components/payment-form';
 import { ContentLock } from '@/components/layout/content-lock';
+import { getPremiumContent } from '@/app/admin/premium-content/actions';
+import { useEffect, useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 const service = {
     id: "elite_premium",
@@ -17,8 +19,17 @@ const service = {
 export default function ElitePremiumPage() {
     const { user, loading: authLoading } = useAuth();
     const { hasSubscription, loading: subLoading } = useSubscription();
+    const [content, setContent] = useState({ elitePremiumContent: '' });
+    const [contentLoading, setContentLoading] = useState(true);
     
-    const isLoading = authLoading || subLoading;
+    const isLoading = authLoading || subLoading || contentLoading;
+
+    useEffect(() => {
+        getPremiumContent().then(data => {
+            setContent(data);
+            setContentLoading(false);
+        });
+    }, []);
 
     if (isLoading) {
         return (
@@ -38,10 +49,17 @@ export default function ElitePremiumPage() {
                 title={service.title}
                 description="This is the exclusive content for Elite Premium members."
             />
-            {/* TODO: Add the actual content for this service here */}
-            <div className="text-center p-16 border-2 border-dashed rounded-lg">
-                <p>Elite Content (Premium Signals + Mentorship) Goes Here</p>
-            </div>
+            <Card>
+                <CardHeader>
+                    <CardTitle className="font-headline">Welcome, Elite Member</CardTitle>
+                    <CardDescription>You have unlocked our highest tier of service.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                     <div className="prose prose-invert max-w-none whitespace-pre-wrap">
+                        {content.elitePremiumContent}
+                    </div>
+                </CardContent>
+            </Card>
         </div>
     );
 }

@@ -6,6 +6,9 @@ import { useAuth } from '@/hooks/use-auth';
 import { Loader2 } from 'lucide-react';
 import { PageHeader } from '@/components/page-header';
 import { ContentLock } from '@/components/layout/content-lock';
+import { getPremiumContent } from '@/app/admin/premium-content/actions';
+import { useEffect, useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 const service = {
     id: "mentorship",
@@ -16,8 +19,17 @@ const service = {
 export default function MentorshipPage() {
     const { user, loading: authLoading } = useAuth();
     const { hasSubscription, loading: subLoading } = useSubscription();
+    const [content, setContent] = useState({ mentorshipContent: '' });
+    const [contentLoading, setContentLoading] = useState(true);
     
-    const isLoading = authLoading || subLoading;
+    const isLoading = authLoading || subLoading || contentLoading;
+
+    useEffect(() => {
+        getPremiumContent().then(data => {
+            setContent(data);
+            setContentLoading(false);
+        });
+    }, []);
 
     if (isLoading) {
         return (
@@ -37,10 +49,17 @@ export default function MentorshipPage() {
                 title={service.title}
                 description="Access your one-on-one mentorship resources here."
             />
-            {/* TODO: Add the actual content for this service here */}
-            <div className="text-center p-16 border-2 border-dashed rounded-lg">
-                <p>Mentorship Welcome Info and Scheduling Links Go Here</p>
-            </div>
+            <Card>
+                <CardHeader>
+                    <CardTitle className="font-headline">Welcome to the Mentorship Program</CardTitle>
+                    <CardDescription>Find all the information you need to get started below.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="prose prose-invert max-w-none whitespace-pre-wrap">
+                        {content.mentorshipContent}
+                    </div>
+                </CardContent>
+            </Card>
         </div>
     );
 }

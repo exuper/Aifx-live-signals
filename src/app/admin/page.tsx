@@ -3,7 +3,7 @@
 
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { DollarSign, Users, BarChart2, Loader2, Link as LinkIcon, Calendar, Palette, Network, KeyRound } from "lucide-react";
+import { DollarSign, Users, BarChart2, Loader2, Link as LinkIcon, Calendar, Palette, Network, KeyRound, Crown } from "lucide-react";
 import { Button } from '@/components/ui/button';
 import { auth } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
@@ -30,6 +30,13 @@ const adminFeatures = [
     description: "Update community links and other app content.",
     icon: LinkIcon,
     href: "/admin/content",
+    isExternal: false,
+  },
+    {
+    title: "Premium Content",
+    description: "Update content for EA, Mentorship, and Elite tiers.",
+    icon: Crown,
+    href: "/admin/premium-content",
     isExternal: false,
   },
   {

@@ -3,9 +3,13 @@
 
 import { useSubscription } from '@/hooks/use-subscription';
 import { useAuth } from '@/hooks/use-auth';
-import { Loader2 } from 'lucide-react';
+import { Bot, Download, Loader2 } from 'lucide-react';
 import { PageHeader } from '@/components/page-header';
 import { ContentLock } from '@/components/layout/content-lock';
+import { getPremiumContent } from '@/app/admin/premium-content/actions';
+import { useEffect, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 const service = {
     id: "premium_ea",
@@ -16,8 +20,17 @@ const service = {
 export default function PremiumEaPage() {
     const { user, loading: authLoading } = useAuth();
     const { hasSubscription, loading: subLoading } = useSubscription();
+    const [content, setContent] = useState({ eaDownloadUrl: '' });
+    const [contentLoading, setContentLoading] = useState(true);
     
-    const isLoading = authLoading || subLoading;
+    const isLoading = authLoading || subLoading || contentLoading;
+
+    useEffect(() => {
+        getPremiumContent().then(data => {
+            setContent(data);
+            setContentLoading(false);
+        });
+    }, []);
 
     if (isLoading) {
         return (
@@ -37,10 +50,23 @@ export default function PremiumEaPage() {
                 title={service.title}
                 description="Download and get instructions for the Premium Expert Advisor."
             />
-            {/* TODO: Add the actual content for this service here */}
-            <div className="text-center p-16 border-2 border-dashed rounded-lg">
-                <p>EA Download and Instructions Go Here</p>
-            </div>
+            <Card className="max-w-2xl mx-auto">
+                <CardHeader>
+                    <CardTitle className="font-headline flex items-center gap-2"><Bot />Download Your EA</CardTitle>
+                    <CardDescription>Click the button below to download your exclusive Expert Advisor file.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Button asChild className="w-full" size="lg">
+                        <a href={content.eaDownloadUrl} target="_blank" rel="noopener noreferrer">
+                            <Download className="mr-2" />
+                            Download Premium EA
+                        </a>
+                    </Button>
+                    <p className="text-xs text-muted-foreground mt-4 text-center">
+                        Note: Ensure you have the correct trading platform version installed. Follow the included instructions for installation.
+                    </p>
+                </CardContent>
+            </Card>
         </div>
     );
 }
