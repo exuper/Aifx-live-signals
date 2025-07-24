@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
-import { Loader2, Landmark, Copy, Upload, Smartphone, Bitcoin } from 'lucide-react';
+import { Loader2, Landmark, Copy, Upload, Smartphone, Bitcoin, FileCheck2, Send } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/use-auth';
@@ -47,6 +47,8 @@ export function PaymentForm({ service }: PaymentFormProps) {
   const [receipt, setReceipt] = useState<File | null>(null);
   const [senderName, setSenderName] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [selectedMethod, setSelectedMethod] = useState('');
+
   const { user } = useAuth();
   const router = useRouter();
 
@@ -62,9 +64,15 @@ export function PaymentForm({ service }: PaymentFormProps) {
     loadGateways();
   }, []);
 
-  const handleSubmit = async (method: string) => {
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+
     if (!user) {
         toast({ title: "Authentication Error", description: "You must be logged in to make a payment.", variant: "destructive" });
+        return;
+    }
+    if (!selectedMethod) {
+        toast({ title: "Payment Method Required", description: "Please select a payment method from the options.", variant: "destructive" });
         return;
     }
 
@@ -77,7 +85,7 @@ export function PaymentForm({ service }: PaymentFormProps) {
         formData.append('serviceId', service.id);
         formData.append('serviceTitle', service.title);
         formData.append('priceAmount', service.priceAmount.toString());
-        formData.append('paymentMethod', method);
+        formData.append('paymentMethod', selectedMethod);
         if (senderName) {
             formData.append('senderName', senderName);
         }
@@ -110,8 +118,11 @@ export function PaymentForm({ service }: PaymentFormProps) {
   
   if (isSubmitted) {
       return (
-          <Card className="max-w-lg mx-auto bg-transparent border-none shadow-none">
-              <CardHeader className="text-center">
+          <Card className="max-w-lg mx-auto bg-transparent border-none shadow-none text-center">
+              <CardHeader>
+                  <div className="mx-auto bg-primary/20 p-4 rounded-full w-fit mb-4">
+                        <FileCheck2 className="w-12 h-12 text-primary" />
+                  </div>
                   <CardTitle className="font-headline text-2xl">Submission Received!</CardTitle>
                   <CardDescription>
                       Your payment submission for "{service.title}" has been received. Please contact an admin with your transaction details to get your access code.
@@ -124,54 +135,23 @@ export function PaymentForm({ service }: PaymentFormProps) {
       )
   }
 
-  const ReceiptUpload = ({ id }: { id: string }) => (
-    <div className="space-y-2 pt-4">
-       <Label htmlFor={`receipt-upload-${id}`}>Upload Receipt (Optional)</Label>
-       <div className="flex gap-2">
-          <Input id={`receipt-upload-${id}`} type="file" onChange={(e) => setReceipt(e.target.files?.[0] || null)} className="pt-2 text-xs" />
-       </div>
-       {receipt && <p className="text-xs text-muted-foreground">Selected: {receipt.name}</p>}
-    </div>
-  );
-
-  const renderPaymentContent = (category: keyof PaymentGatewaysData, gatewayTitle: string, Icon: React.ElementType, needsSenderInfo: boolean) => {
+  const renderPaymentOptions = (category: keyof PaymentGatewaysData, gatewayTitle: string) => {
       if (!gateways || gateways[category].length === 0) {
           return null;
       }
       return (
-           <Card className="bg-background/50 border-none shadow-none">
-                <CardContent className="p-0 pt-6 space-y-4">
-                    <p className="text-sm text-center text-muted-foreground">Send ${service.priceAmount} to one of the {gatewayTitle} options below.</p>
-                    <Accordion type="single" collapsible className="w-full">
-                        {gateways[category].map(gateway => (
-                            <AccordionItem key={gateway.id} value={gateway.id}>
-                                <AccordionTrigger>{gateway.title}</AccordionTrigger>
-                                <AccordionContent className="space-y-2">
-                                    {gateway.details.map(detail => (
-                                        <InfoRow key={detail.label} label={detail.label} value={detail.value} />
-                                    ))}
-                                </AccordionContent>
-                            </AccordionItem>
-                        ))}
-                    </Accordion>
-                    {needsSenderInfo && (
-                        <div className="space-y-2">
-                            <Label htmlFor="sender-name">Sender/Agent Name or Transaction ID</Label>
-                            <Input 
-                                id="sender-name" 
-                                placeholder="e.g. John Doe or #123XYZ" 
-                                value={senderName} 
-                                onChange={(e) => setSenderName(e.target.value)} 
-                            />
-                        </div>
-                    )}
-                    <ReceiptUpload id={category} />
-                    <Button onClick={() => handleSubmit(gatewayTitle)} className="w-full" disabled={isSubmitting || (needsSenderInfo && !senderName)}>
-                        {isSubmitting ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : null}
-                        I Have Paid, Submit for Verification
-                    </Button>
-                </CardContent>
-           </Card>
+           <Accordion type="single" collapsible className="w-full">
+                {gateways[category].map(gateway => (
+                    <AccordionItem key={gateway.id} value={gateway.id}>
+                        <AccordionTrigger onClick={() => setSelectedMethod(gateway.title)}>{gateway.title}</AccordionTrigger>
+                        <AccordionContent className="space-y-2">
+                            {gateway.details.map(detail => (
+                                <InfoRow key={detail.label} label={detail.label} value={detail.value} />
+                            ))}
+                        </AccordionContent>
+                    </AccordionItem>
+                ))}
+            </Accordion>
       )
   }
   
@@ -186,25 +166,64 @@ export function PaymentForm({ service }: PaymentFormProps) {
   }
 
   return (
-    <Accordion type="multiple" className="w-full">
-        <AccordionItem value="crypto">
-            <AccordionTrigger className="text-lg font-headline"><Bitcoin className="mr-2"/>Crypto</AccordionTrigger>
-            <AccordionContent>
-                {renderPaymentContent('crypto', 'Crypto', Bitcoin, false)}
-            </AccordionContent>
-        </AccordionItem>
-         <AccordionItem value="transfer">
-            <AccordionTrigger className="text-lg font-headline"><Landmark className="mr-2"/>Bank/Wire Transfer</AccordionTrigger>
-            <AccordionContent>
-                 {renderPaymentContent('transfer', 'Transfer', Landmark, true)}
-            </AccordionContent>
-        </AccordionItem>
-         <AccordionItem value="mobile">
-            <AccordionTrigger className="text-lg font-headline"><Smartphone className="mr-2"/>Mobile Money</AccordionTrigger>
-            <AccordionContent>
-                {renderPaymentContent('mobile', 'Mobile Money', Smartphone, true)}
-            </AccordionContent>
-        </AccordionItem>
-    </Accordion>
+    <Card className="bg-background/50 border-none shadow-none">
+        <CardContent className="p-0 pt-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
+                <div>
+                    <Label className="text-base font-semibold">1. Choose Payment Method</Label>
+                    <p className="text-sm text-muted-foreground mb-4">Select a method and send ${service.priceAmount} to the provided details.</p>
+                     <Accordion type="multiple" className="w-full">
+                        <AccordionItem value="crypto">
+                            <AccordionTrigger className="text-lg font-headline"><Bitcoin className="mr-2"/>Crypto</AccordionTrigger>
+                            <AccordionContent>
+                                {renderPaymentOptions('crypto', 'Crypto')}
+                            </AccordionContent>
+                        </AccordionItem>
+                        <AccordionItem value="transfer">
+                            <AccordionTrigger className="text-lg font-headline"><Landmark className="mr-2"/>Bank/Wire Transfer</AccordionTrigger>
+                            <AccordionContent>
+                                {renderPaymentOptions('transfer', 'Transfer')}
+                            </AccordionContent>
+                        </AccordionItem>
+                        <AccordionItem value="mobile">
+                            <AccordionTrigger className="text-lg font-headline"><Smartphone className="mr-2"/>Mobile Money</AccordionTrigger>
+                            <AccordionContent>
+                                {renderPaymentOptions('mobile', 'Mobile Money')}
+                            </AccordionContent>
+                        </AccordionItem>
+                    </Accordion>
+                </div>
+
+                <div>
+                    <Label className="text-base font-semibold">2. Submit Your Proof</Label>
+                     <p className="text-sm text-muted-foreground mb-4">Fill out the details below so we can verify your payment.</p>
+                    <div className="space-y-4 p-4 border rounded-md">
+                        <div className="space-y-2">
+                            <Label htmlFor="sender-name">Sender/Agent Name or Transaction ID</Label>
+                            <Input 
+                                id="sender-name" 
+                                placeholder="e.g. John Doe or #123XYZ" 
+                                value={senderName} 
+                                onChange={(e) => setSenderName(e.target.value)} 
+                                required
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="receipt-upload">Upload Receipt (Optional)</Label>
+                            <div className="flex gap-2">
+                                <Input id="receipt-upload" type="file" onChange={(e) => setReceipt(e.target.files?.[0] || null)} className="pt-2 text-xs" />
+                            </div>
+                            {receipt && <p className="text-xs text-muted-foreground">Selected: {receipt.name}</p>}
+                        </div>
+                    </div>
+                </div>
+
+                <Button type="submit" className="w-full" size="lg" disabled={isSubmitting || !selectedMethod || !senderName}>
+                    {isSubmitting ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Send className="mr-2" />}
+                    I Have Paid, Submit for Verification
+                </Button>
+            </form>
+        </CardContent>
+    </Card>
   );
 }

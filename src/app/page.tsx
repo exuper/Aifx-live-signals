@@ -7,7 +7,7 @@ import { SignalCard } from "@/components/signal-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Signal } from "@/lib/mock-data";
 import { db } from '@/lib/firebase';
-import { collection, onSnapshot, orderBy, query, where, Timestamp } from 'firebase/firestore';
+import { collection, onSnapshot, orderBy, query, Timestamp } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Home() {
@@ -15,8 +15,6 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Query for all signals, ordered by creation date.
-    // Filtering for premium/non-premium will happen on the client.
     const q = query(
       collection(db, "signals"), 
       orderBy("createdAt", "desc")
@@ -25,7 +23,6 @@ export default function Home() {
       const signalsData: Signal[] = [];
       querySnapshot.forEach((doc) => {
         const data = doc.data();
-        // Client-side filtering for non-premium signals
         if (data.isPremium === false) {
             signalsData.push({ 
               id: doc.id, 

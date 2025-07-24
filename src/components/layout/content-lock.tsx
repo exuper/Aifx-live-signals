@@ -44,9 +44,9 @@ export function ContentLock({ service }: ContentLockProps) {
         setIsSubmitting(true);
         try {
             const result = await redeemAccessCode(user.uid, user.email!, { code });
-            if (result.success) {
-                toast({ title: "Success!", description: `You now have access to ${service.title}.`});
-                // Force a reload to re-check subscription status
+            if (result.success && result.serviceId) {
+                toast({ title: "Success!", description: `You now have access to ${service.title}. Refreshing...`});
+                // Force a reload to re-check subscription status from the server
                 window.location.reload();
             } else {
                 toast({ title: "Redemption Failed", description: result.error, variant: "destructive" });

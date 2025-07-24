@@ -8,7 +8,7 @@ import { PageHeader } from '@/components/page-header';
 import { ContentLock } from '@/components/layout/content-lock';
 import { SignalCard } from '@/components/signal-card';
 import { Signal } from '@/lib/mock-data';
-import { collection, onSnapshot, orderBy, query, where, Timestamp } from 'firebase/firestore';
+import { collection, onSnapshot, orderBy, query, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -31,8 +31,6 @@ export default function PremiumSignalsPage() {
         if (authLoading || subLoading) return;
         
         if (user && hasSubscription(service.id)) {
-            // Query for all signals, ordered by creation date.
-            // Filtering for premium signals will happen on the client.
             const q = query(
                 collection(db, "signals"), 
                 orderBy("createdAt", "desc")
@@ -41,7 +39,6 @@ export default function PremiumSignalsPage() {
                 const signalsData: Signal[] = [];
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
-                    // Client-side filtering for premium signals
                     if (data.isPremium === true) {
                         signalsData.push({ 
                           id: doc.id, 
@@ -75,7 +72,6 @@ export default function PremiumSignalsPage() {
         return <ContentLock service={service} />;
     }
 
-    // User is subscribed, show the premium content
     return (
         <div className="space-y-8">
             <PageHeader
