@@ -3,7 +3,7 @@
 
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { DollarSign, Users, BarChart2, Loader2, Link as LinkIcon, Calendar, Palette, Network, KeyRound, Crown } from "lucide-react";
+import { DollarSign, Users, BarChart2, Loader2, Link as LinkIcon, Calendar, Palette, Network, KeyRound, Crown, ShieldCheck } from "lucide-react";
 import { Button } from '@/components/ui/button';
 import { auth } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
@@ -65,6 +65,13 @@ const adminFeatures = [
     description: "Track and verify user payments and subscriptions.",
     icon: DollarSign,
     href: "/admin/payments",
+    isExternal: false,
+  },
+  {
+    title: "Manage Verifications",
+    description: "Review and approve user broker account submissions.",
+    icon: ShieldCheck,
+    href: "/admin/verifications",
     isExternal: false,
   },
   {

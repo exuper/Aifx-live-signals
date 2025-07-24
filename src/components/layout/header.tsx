@@ -1,7 +1,7 @@
 
 'use client';
 
-import { Bell, LogOut, Menu, User, CreditCard } from "lucide-react";
+import { Bell, LogOut, Menu, User, CreditCard, ShieldCheck } from "lucide-react";
 import { Button } from "../ui/button";
 import { AppLogo } from "./app-logo";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
@@ -122,6 +122,12 @@ export function Header() {
                 <Link href="/account/billing">
                     <CreditCard className="mr-2 h-4 w-4" />
                     <span>Billing</span>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/account/broker">
+                    <ShieldCheck className="mr-2 h-4 w-4" />
+                    <span>Broker Verification</span>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />

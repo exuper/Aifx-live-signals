@@ -4,7 +4,7 @@
 import { useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
-import { Loader2, User, CreditCard } from 'lucide-react';
+import { Loader2, User, CreditCard, ShieldCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 
@@ -18,6 +18,11 @@ const accountNavItems = [
         title: "Billing",
         href: "/account/billing",
         icon: CreditCard
+    },
+    {
+        title: "Broker Verification",
+        href: "/account/broker",
+        icon: ShieldCheck
     }
 ];
 

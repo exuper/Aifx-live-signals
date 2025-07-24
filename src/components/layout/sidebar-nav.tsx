@@ -26,6 +26,7 @@ const adminItems = [
     { href: '/admin/gateways', icon: Network, label: 'Payment Gateways' },
     { href: '/admin/codes', icon: KeyRound, label: 'Manage Codes' },
     { href: '/admin/payments', icon: DollarSign, label: 'View Payments' },
+    { href: '/admin/verifications', icon: ShieldCheck, label: 'Verifications' },
 ]
 
 export function SidebarNav() {
