@@ -14,35 +14,38 @@ const paymentSchema = z.object({
   priceAmount: z.coerce.number(),
   paymentMethod: z.string(),
   senderName: z.string().optional(),
-  receipt: z.any().refine(file => file === undefined || (file instanceof File && file.size > 0), {
-    message: "Receipt must be a valid file.",
-  }).optional(),
+  // Receipt is handled separately now
 });
 
 
 export async function submitPayment(formData: FormData) {
-  const rawData = Object.fromEntries(formData.entries());
-  
-  // If no file is selected, the browser sends an empty File object. Remove it.
-  if (rawData.receipt && (rawData.receipt as File).size === 0) {
-      delete rawData.receipt;
-  }
+  const rawData = {
+      userId: formData.get('userId'),
+      userEmail: formData.get('userEmail'),
+      serviceId: formData.get('serviceId'),
+      serviceTitle: formData.get('serviceTitle'),
+      priceAmount: formData.get('priceAmount'),
+      paymentMethod: formData.get('paymentMethod'),
+      senderName: formData.get('senderName') || undefined,
+  };
 
   const validatedData = paymentSchema.safeParse(rawData);
+  const receiptFile = formData.get('receipt') as File | null;
 
   if (!validatedData.success) {
     console.error("Zod validation error:", validatedData.error.errors);
     return { success: false, error: 'Invalid data provided. Please check your inputs.' };
   }
 
-  const { receipt, ...paymentData } = validatedData.data;
+  const paymentData = validatedData.data;
 
   try {
     let receiptUrl: string | undefined = undefined;
 
-    if (receipt) {
-        const storageRef = ref(storage, `receipts/${Date.now()}_${receipt.name}`);
-        const snapshot = await uploadBytes(storageRef, receipt);
+    // Check if a valid file was uploaded
+    if (receiptFile && receiptFile.size > 0) {
+        const storageRef = ref(storage, `receipts/${Date.now()}_${receiptFile.name}`);
+        const snapshot = await uploadBytes(storageRef, receiptFile);
         receiptUrl = await getDownloadURL(snapshot.ref);
     }
 
