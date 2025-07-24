@@ -22,7 +22,7 @@ const appearanceSchema = z.object({
   primary: z.string().regex(hslColorRegex, "Must be HSL values like '72 100% 50%'"),
   backgroundHsl: z.string().regex(hslColorRegex, "Must be HSL values"),
   accent: z.string().regex(hslColorRegex, "Must be HSL values"),
-  background: z.enum(['lines', 'particles', 'aurora']),
+  background: z.enum(['lines', 'particles', 'aurora', 'blobs', 'grid']),
   fontBody: z.string().min(1, "Body font is required."),
   fontHeadline: z.string().min(1, "Headline font is required."),
 });
@@ -207,6 +207,8 @@ export default function ManageAppearancePage() {
                     <SelectItem value="lines">Falling Lines</SelectItem>
                     <SelectItem value="particles">Floating Particles</SelectItem>
                     <SelectItem value="aurora">Gradient Aurora</SelectItem>
+                    <SelectItem value="blobs">Floating Blobs</SelectItem>
+                    <SelectItem value="grid">Digital Grid</SelectItem>
                     </SelectContent>
                 </Select>
                 )}

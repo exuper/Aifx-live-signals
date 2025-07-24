@@ -12,7 +12,7 @@ const appearanceSchema = z.object({
   primary: z.string().regex(hslColorRegex, "Primary color must be a valid HSL string (e.g., '72 100% 50%')"),
   backgroundHsl: z.string().regex(hslColorRegex, "Background color must be a valid HSL string"),
   accent: z.string().regex(hslColorRegex, "Accent color must be a valid HSL string"),
-  background: z.enum(['lines', 'particles', 'aurora']),
+  background: z.enum(['lines', 'particles', 'aurora', 'blobs', 'grid']),
   fontBody: z.string().min(1, "Body font is required."),
   fontHeadline: z.string().min(1, "Headline font is required."),
 });

@@ -6,6 +6,8 @@ import { Header } from '@/components/layout/header';
 import { AnimatedBackground } from '@/components/layout/animated-background';
 import { ParticlesBackground } from '@/components/layout/particles-background';
 import { AuroraBackground } from '@/components/layout/aurora-background';
+import { BlobsBackground } from '@/components/layout/blobs-background';
+import { GridBackground } from '@/components/layout/grid-background';
 import { BottomNav } from '@/components/layout/bottom-nav';
 import { getAppearanceData } from '@/app/admin/appearance/actions';
 import { AuthProvider } from '@/hooks/use-auth';
@@ -26,6 +28,8 @@ const backgroundComponents = {
   lines: AnimatedBackground,
   particles: ParticlesBackground,
   aurora: AuroraBackground,
+  blobs: BlobsBackground,
+  grid: GridBackground,
 };
 
 export default async function RootLayout({
