@@ -6,9 +6,13 @@ import { useAuth } from '@/hooks/use-auth';
 import { Loader2 } from 'lucide-react';
 import { AccessDenied } from '@/components/layout/access-denied';
 import { PageHeader } from '@/components/page-header';
+import { PaymentForm } from '@/components/payment-form';
 
-const SERVICE_ID = 'premium_ea';
-const SERVICE_TITLE = 'Premium EA';
+const service = {
+    id: "premium_ea",
+    title: "Premium EA",
+    priceAmount: 100
+};
 
 export default function PremiumEaPage() {
     const { user, loading: authLoading } = useAuth();
@@ -24,14 +28,26 @@ export default function PremiumEaPage() {
         );
     }
 
-    if (!user || !hasSubscription(SERVICE_ID)) {
-        return <AccessDenied serviceTitle={SERVICE_TITLE} />;
+    if (!user) {
+        return <AccessDenied serviceTitle={service.title} />;
+    }
+    
+    if (!hasSubscription(service.id)) {
+        return (
+             <div className="space-y-8">
+                <PageHeader
+                    title={`Subscribe to ${service.title}`}
+                    description="Choose a payment method below to get instant access."
+                />
+                <PaymentForm service={service} />
+            </div>
+        );
     }
 
     return (
         <div className="space-y-8">
             <PageHeader
-                title={SERVICE_TITLE}
+                title={service.title}
                 description="Download and get instructions for the Premium Expert Advisor."
             />
             {/* TODO: Add the actual content for this service here */}

@@ -6,6 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Signal, Crown, Bot, GraduationCap } from "lucide-react";
 import Link from "next/link";
+import { useAuth } from '@/hooks/use-auth';
+import { useSubscription } from '@/hooks/use-subscription';
+import { cn } from '@/lib/utils';
+import { CheckCircle } from 'lucide-react';
 
 const services = [
   {
@@ -51,6 +55,8 @@ const services = [
 ];
 
 export default function PremiumPage() {
+  const { user } = useAuth();
+  const { hasSubscription } = useSubscription();
 
   return (
     <div className="space-y-8">
@@ -60,29 +66,37 @@ export default function PremiumPage() {
       />
 
       <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-2">
-        {services.map((service) => (
-          <Card key={service.title} className="flex flex-col border-primary/50">
-            <CardHeader>
-              <div className="flex items-start gap-4">
-                <div className="p-3 rounded-full bg-primary/20">
-                  <service.icon className="w-8 h-8 text-primary" />
+        {services.map((service) => {
+          const isSubscribed = user ? hasSubscription(service.id) : false;
+          return (
+            <Card key={service.id} className={cn("flex flex-col", isSubscribed ? "border-primary/80" : "border-border")}>
+              <CardHeader>
+                <div className="flex items-start gap-4">
+                  <div className={cn("p-3 rounded-full", isSubscribed ? "bg-primary/20" : "bg-secondary")}>
+                    <service.icon className={cn("w-8 h-8", isSubscribed ? "text-primary" : "text-secondary-foreground")} />
+                  </div>
+                  <div>
+                    <CardTitle className="font-headline text-2xl">{service.title}</CardTitle>
+                    <CardDescription>{service.description}</CardDescription>
+                  </div>
                 </div>
-                <div>
-                  <CardTitle className="font-headline text-2xl">{service.title}</CardTitle>
-                  <CardDescription>{service.description}</CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="flex-grow flex flex-col justify-end items-center text-center space-y-4">
-              <p className="text-3xl font-bold text-primary">{service.price}</p>
-                <Button className="w-full" variant="premium" asChild>
-                  <Link href={service.href}>
-                    {service.cta}
-                  </Link>
+              </CardHeader>
+              <CardContent className="flex-grow flex flex-col justify-end items-center text-center space-y-4">
+                <p className="text-3xl font-bold text-primary">{service.price}</p>
+                <Button asChild className="w-full" variant={isSubscribed ? "outline" : "premium"} disabled={isSubscribed}>
+                   <Link href={user ? service.href : '/login'}>
+                    {isSubscribed ? (
+                        <>
+                            <CheckCircle className="mr-2" />
+                            Subscribed
+                        </>
+                    ) : service.cta}
+                    </Link>
                 </Button>
-            </CardContent>
-          </Card>
-        ))}
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
     </div>
   );

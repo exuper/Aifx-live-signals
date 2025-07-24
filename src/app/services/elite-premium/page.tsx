@@ -6,9 +6,13 @@ import { useAuth } from '@/hooks/use-auth';
 import { Loader2 } from 'lucide-react';
 import { AccessDenied } from '@/components/layout/access-denied';
 import { PageHeader } from '@/components/page-header';
+import { PaymentForm } from '@/components/payment-form';
 
-const SERVICE_ID = 'elite_premium';
-const SERVICE_TITLE = 'Elite Premium';
+const service = {
+    id: "elite_premium",
+    title: "Elite Premium",
+    priceAmount: 100
+};
 
 export default function ElitePremiumPage() {
     const { user, loading: authLoading } = useAuth();
@@ -24,14 +28,26 @@ export default function ElitePremiumPage() {
         );
     }
 
-    if (!user || !hasSubscription(SERVICE_ID)) {
-        return <AccessDenied serviceTitle={SERVICE_TITLE} />;
+    if (!user) {
+        return <AccessDenied serviceTitle={service.title} />;
+    }
+
+    if (!hasSubscription(service.id)) {
+        return (
+             <div className="space-y-8">
+                <PageHeader
+                    title={`Subscribe to ${service.title}`}
+                    description="Choose a payment method below to get instant access."
+                />
+                <PaymentForm service={service} />
+            </div>
+        );
     }
 
     return (
         <div className="space-y-8">
             <PageHeader
-                title={SERVICE_TITLE}
+                title={service.title}
                 description="This is the exclusive content for Elite Premium members."
             />
             {/* TODO: Add the actual content for this service here */}

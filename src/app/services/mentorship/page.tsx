@@ -6,9 +6,13 @@ import { useAuth } from '@/hooks/use-auth';
 import { Loader2 } from 'lucide-react';
 import { AccessDenied } from '@/components/layout/access-denied';
 import { PageHeader } from '@/components/page-header';
+import { PaymentForm } from '@/components/payment-form';
 
-const SERVICE_ID = 'mentorship';
-const SERVICE_TITLE = 'Mentorship';
+const service = {
+    id: "mentorship",
+    title: "Mentorship",
+    priceAmount: 50
+};
 
 export default function MentorshipPage() {
     const { user, loading: authLoading } = useAuth();
@@ -24,14 +28,26 @@ export default function MentorshipPage() {
         );
     }
 
-    if (!user || !hasSubscription(SERVICE_ID)) {
-        return <AccessDenied serviceTitle={SERVICE_TITLE} />;
+    if (!user) {
+        return <AccessDenied serviceTitle={service.title} />;
+    }
+
+    if (!hasSubscription(service.id)) {
+        return (
+             <div className="space-y-8">
+                <PageHeader
+                    title={`Subscribe to ${service.title}`}
+                    description="Choose a payment method below to get instant access."
+                />
+                <PaymentForm service={service} />
+            </div>
+        );
     }
 
     return (
         <div className="space-y-8">
             <PageHeader
-                title={SERVICE_TITLE}
+                title={service.title}
                 description="Access your one-on-one mentorship resources here."
             />
             {/* TODO: Add the actual content for this service here */}
