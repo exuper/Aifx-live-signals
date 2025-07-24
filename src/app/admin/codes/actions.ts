@@ -3,7 +3,7 @@
 
 import { z } from 'zod';
 import { db } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp, getDocs, query, orderBy } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, getDocs, query, orderBy, Timestamp } from 'firebase/firestore';
 import { addDays } from 'date-fns';
 
 const generateCodeSchema = z.object({
@@ -48,6 +48,17 @@ export async function createAccessCode(data: GenerateCodeFormData) {
   }
 }
 
+// Convert Firestore Timestamps to serializable strings
+const toSerializableObject = (docData: any) => {
+  const data = { ...docData };
+  for (const key in data) {
+    if (data[key] instanceof Timestamp) {
+      data[key] = data[key].toDate().toISOString();
+    }
+  }
+  return data;
+};
+
 export async function getAccessCodes() {
    try {
     const q = query(collection(db, 'accessCodes'), orderBy('createdAt', 'desc'));
@@ -59,7 +70,7 @@ export async function getAccessCodes() {
     
     return snapshot.docs.map(doc => ({
       id: doc.id,
-      ...doc.data(),
+      ...toSerializableObject(doc.data()),
     }));
   } catch (error) {
     console.error("Error fetching access codes:", error);

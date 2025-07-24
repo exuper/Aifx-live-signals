@@ -19,7 +19,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { format, formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { Timestamp } from 'firebase/firestore';
 
 
 const generateCodeSchema = z.object({
@@ -41,9 +40,9 @@ interface AccessCode {
   durationDays: number;
   isUsed: boolean;
   usedByEmail?: string;
-  expiresAt: Timestamp;
-  usedAt?: Timestamp;
-  createdAt: Timestamp;
+  expiresAt: string; // Changed from Timestamp
+  usedAt?: string;   // Changed from Timestamp
+  createdAt: string;  // Changed from Timestamp
 }
 
 export default function ManageCodesPage() {
@@ -182,7 +181,7 @@ export default function ManageCodesPage() {
                     </TableHeader>
                     <TableBody>
                         {codes.map(code => {
-                            const expiresDate = code.expiresAt.toDate();
+                            const expiresDate = new Date(code.expiresAt);
                             const isExpired = new Date() > expiresDate;
                             
                             let status: 'Used' | 'Expired' | 'Active' = 'Active';
