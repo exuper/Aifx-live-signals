@@ -9,7 +9,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyBlogQotFEGSgDqgjIZXpggyYLIdcS2mDI",
   authDomain: "ai-forex-signals-live.firebaseapp.com",
   projectId: "ai-forex-signals-live",
-  storageBucket: "ai-forex-signals-live.appspot.com",
+  storageBucket: "ai-forex-signals-live.firebasestorage.app",
   messagingSenderId: "513364826247",
   appId: "1:513364826247:web:81c256a41c6ceccc368022"
 };
