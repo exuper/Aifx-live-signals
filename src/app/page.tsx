@@ -7,7 +7,7 @@ import { SignalCard } from "@/components/signal-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Signal } from "@/lib/mock-data";
 import { db } from '@/lib/firebase';
-import { collection, onSnapshot, orderBy, query } from 'firebase/firestore';
+import { collection, onSnapshot, orderBy, query, where } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Home() {
@@ -15,7 +15,12 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const q = query(collection(db, "signals"), orderBy("createdAt", "desc"));
+    // Query for signals that are NOT premium
+    const q = query(
+      collection(db, "signals"), 
+      where("isPremium", "==", false),
+      orderBy("createdAt", "desc")
+    );
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const signalsData: Signal[] = [];
       querySnapshot.forEach((doc) => {

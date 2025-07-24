@@ -16,9 +16,10 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
 import { createSignal, updateSignalStatus, deleteSignal } from './actions';
-import { Loader2, PlusCircle, Trash2, CheckCircle, XCircle, ArrowUp, ArrowDown, Clock } from 'lucide-react';
+import { Loader2, PlusCircle, Trash2, CheckCircle, XCircle, ArrowUp, ArrowDown, Clock, Star } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { Switch } from '@/components/ui/switch';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,7 +29,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -39,6 +39,7 @@ const signalSchema = z.object({
   stopLoss: z.coerce.number().positive("Stop loss must be positive"),
   takeProfit1: z.coerce.number().positive("Take profit 1 must be positive"),
   takeProfit2: z.coerce.number().positive("Take profit 2 must be positive"),
+  isPremium: z.boolean().optional(),
 });
 
 export default function ManageSignalsPage() {
@@ -56,6 +57,7 @@ export default function ManageSignalsPage() {
         stopLoss: 0,
         takeProfit1: 0,
         takeProfit2: 0,
+        isPremium: false,
     }
   });
 
@@ -220,6 +222,19 @@ export default function ManageSignalsPage() {
                     </div>
                 </div>
 
+                <div className="space-y-2">
+                    <Controller
+                        name="isPremium"
+                        control={control}
+                        render={({ field }) => (
+                            <div className="flex items-center space-x-2 p-2 rounded-md bg-secondary">
+                                <Switch id="isPremium" checked={field.value} onCheckedChange={field.onChange} />
+                                <Label htmlFor="isPremium" className="font-bold text-primary">Premium Signal</Label>
+                            </div>
+                        )}
+                    />
+                </div>
+
                 <Button type="submit" className="w-full" disabled={isSubmitting}>
                   {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PlusCircle className="mr-2 h-4 w-4" />}
                   {isSubmitting ? 'Creating...' : 'Create Signal'}
@@ -283,7 +298,10 @@ function SignalList({title, signals, onUpdate, onDelete, isLoading}: {title: str
                             <Card key={signal.id} className="w-full overflow-hidden">
                                 <CardHeader className="flex flex-row items-center justify-between gap-4 p-4 bg-muted/50">
                                     <div>
-                                        <CardTitle className="font-headline text-lg">{signal.pair}</CardTitle>
+                                        <CardTitle className="font-headline text-lg flex items-center gap-2">
+                                            {signal.isPremium && <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />}
+                                            {signal.pair}
+                                        </CardTitle>
                                         <div className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
                                             <Clock className="w-3 h-3" />
                                             {formatTimestamp(signal.createdAt)}

@@ -12,6 +12,7 @@ const signalSchema = z.object({
   stopLoss: z.coerce.number(),
   takeProfit1: z.coerce.number(),
   takeProfit2: z.coerce.number(),
+  isPremium: z.boolean().optional(),
 });
 
 export async function createSignal(data: z.infer<typeof signalSchema>) {
@@ -20,6 +21,7 @@ export async function createSignal(data: z.infer<typeof signalSchema>) {
   try {
     await addDoc(collection(db, 'signals'), {
       ...validatedData,
+      isPremium: validatedData.isPremium || false,
       status: 'Active',
       createdAt: serverTimestamp(),
     });
