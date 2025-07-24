@@ -78,7 +78,7 @@ export default function PremiumPage() {
               <CardContent className="flex-grow flex flex-col justify-end items-center text-center space-y-4">
                 <p className="text-3xl font-bold text-primary">{service.price}</p>
                 <DialogTrigger asChild>
-                  <Button className="w-full" onClick={() => setSelectedService(service)}>
+                  <Button className="w-full" variant="premium" onClick={() => setSelectedService(service)}>
                     {service.cta}
                   </Button>
                 </DialogTrigger>
