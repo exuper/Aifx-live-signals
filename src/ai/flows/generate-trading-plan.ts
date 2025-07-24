@@ -1,17 +1,21 @@
+
 'use server';
 
 /**
- * @fileOverview An AI-powered trading plan generator.
+ * @fileOverview An AI-powered trading plan generator that saves the result to the user's profile.
  *
- * - generateTradingPlan - A function that creates a personalized trading plan based on user inputs.
+ * - generateTradingPlan - A function that creates a personalized trading plan based on user inputs and saves it.
  * - GenerateTradingPlanInput - The input type for the generateTradingPlan function.
  * - GenerateTradingPlanOutput - The return type for the generateTradingPlan function.
  */
 
 import {ai} from '@/ai/genkit';
+import { db } from '@/lib/firebase';
+import { doc, updateDoc } from 'firebase/firestore';
 import {z} from 'genkit';
 
 const GenerateTradingPlanInputSchema = z.object({
+  userId: z.string(), // Added to know which user to save the plan for
   riskTolerance: z.enum(['Low', 'Medium', 'High']),
   capital: z.coerce.number().positive(),
   experience: z.enum(['Beginner', 'Intermediate', 'Advanced']),
@@ -36,7 +40,23 @@ const GenerateTradingPlanOutputSchema = z.object({
 export type GenerateTradingPlanOutput = z.infer<typeof GenerateTradingPlanOutputSchema>;
 
 export async function generateTradingPlan(input: GenerateTradingPlanInput): Promise<GenerateTradingPlanOutput> {
-  return generateTradingPlanFlow(input);
+  const plan = await generateTradingPlanFlow(input);
+  
+  // Save the generated plan to the user's document in Firestore
+  try {
+    const userRef = doc(db, 'users', input.userId);
+    await updateDoc(userRef, {
+      tradingPlan: {
+        ...plan,
+        generatedAt: new Date(), // Save generation timestamp
+      },
+    });
+  } catch (error) {
+    console.error("Error saving trading plan to user profile:", error);
+    // We don't throw here, as returning the plan to the user is the primary goal.
+  }
+  
+  return plan;
 }
 
 const prompt = ai.definePrompt({
