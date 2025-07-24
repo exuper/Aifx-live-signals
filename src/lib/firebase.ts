@@ -1,19 +1,20 @@
-
 // Import the functions you need from the SDKs you need
-import 'dotenv/config';
 import { initializeApp, getApps } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 // Your web app's Firebase configuration
+// IMPORTANT: This is not a recommended practice for production.
+// Credentials are hardcoded here as a last resort to fix a persistent
+// environment configuration issue.
 const firebaseConfig = {
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  projectId: "ai-forex-signals-live",
+  appId: "1:1095034676935:web:271424e469500918961a86",
+  storageBucket: "ai-forex-signals-live.appspot.com",
+  apiKey: "REDACTED_API_KEY",
+  authDomain: "ai-forex-signals-live.firebaseapp.com",
+  messagingSenderId: "1095034676935",
 };
 
 // Initialize Firebase
