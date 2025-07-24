@@ -189,4 +189,3 @@ function PaymentTable({ title, payments, isLoading, onStatusUpdate }: {
         </Card>
     );
 }
-
