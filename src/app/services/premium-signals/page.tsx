@@ -8,7 +8,7 @@ import { PageHeader } from '@/components/page-header';
 import { ContentLock } from '@/components/layout/content-lock';
 import { SignalCard } from '@/components/signal-card';
 import { Signal } from '@/lib/mock-data';
-import { collection, onSnapshot, orderBy, query, Timestamp, where } from 'firebase/firestore';
+import { collection, onSnapshot, orderBy, query, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -32,22 +32,24 @@ export default function PremiumSignalsPage() {
         
         if (user && hasSubscription(service.id)) {
             setContentLoading(true);
+            // Simplified query: only order by creation date.
             const q = query(
                 collection(db, "signals"), 
-                where("isPremium", "==", true),
                 orderBy("createdAt", "desc")
             );
             const unsubscribe = onSnapshot(q, (querySnapshot) => {
-                const signalsData: Signal[] = [];
+                const allSignals: Signal[] = [];
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
-                    signalsData.push({ 
+                    allSignals.push({ 
                         id: doc.id, 
                         ...data,
                         createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate() : new Date()
                     } as Signal);
                 });
-                setSignals(signalsData);
+                // Filter for premium signals on the client side.
+                const premiumSignals = allSignals.filter(signal => signal.isPremium);
+                setSignals(premiumSignals);
                 setContentLoading(false);
             }, (error) => {
                 console.error("Error fetching premium signals:", error);

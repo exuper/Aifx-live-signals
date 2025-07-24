@@ -15,23 +15,23 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const q = query(
-      collection(db, "signals"), 
-      orderBy("createdAt", "desc")
-    );
+    // Simplified query: only order by creation date.
+    const q = query(collection(db, "signals"), orderBy("createdAt", "desc"));
+    
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const signalsData: Signal[] = [];
+      const allSignals: Signal[] = [];
       querySnapshot.forEach((doc) => {
         const data = doc.data();
-        if (data.isPremium === false) {
-            signalsData.push({ 
-              id: doc.id, 
-              ...data,
-              createdAt: data.createdAt instanceof Timestamp ? data.createdAt : Timestamp.now()
-            } as Signal);
-        }
+        allSignals.push({ 
+          id: doc.id, 
+          ...data,
+          createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate() : new Date()
+        } as Signal);
       });
-      setSignals(signalsData);
+      
+      // Filter for free signals on the client side.
+      const freeSignals = allSignals.filter(signal => !signal.isPremium);
+      setSignals(freeSignals);
       setIsLoading(false);
     }, (error) => {
       console.error("Error fetching signals:", error);
