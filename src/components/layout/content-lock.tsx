@@ -43,7 +43,7 @@ export function ContentLock({ service }: ContentLockProps) {
 
         setIsSubmitting(true);
         try {
-            const result = await redeemAccessCode(user.uid, user.email!);
+            const result = await redeemAccessCode(user.uid, user.email!, code);
             if (result.success && result.serviceId) {
                 toast({ title: "Success!", description: `You now have access to ${service.title}. The page will now reload.`});
                 // Force a reload to re-check subscription status from the server
