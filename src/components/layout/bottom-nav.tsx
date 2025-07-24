@@ -3,9 +3,8 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { BarChart2, BotMessageSquare, Calendar, ShieldCheck, Users, LayoutDashboard } from 'lucide-react';
+import { BarChart2, BotMessageSquare, Calendar, ShieldCheck, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useAuth } from '@/hooks/use-auth';
 
 const navItems = [
   { href: '/', icon: BarChart2, label: 'Signals' },
@@ -15,11 +14,8 @@ const navItems = [
   { href: '/community', icon: Users, label: 'Community' },
 ];
 
-const adminNavItem = { href: '/admin', icon: LayoutDashboard, label: 'Admin' };
-
 export function BottomNav() {
   const pathname = usePathname();
-  const { user, loading } = useAuth();
   
   if (pathname.startsWith('/admin')) {
       return null;
@@ -47,21 +43,6 @@ export function BottomNav() {
           </div>
         </Link>
       ))}
-       {user && (
-         <Link href={adminNavItem.href} key={adminNavItem.href} passHref>
-            <div
-                className={cn(
-                'flex flex-col items-center justify-center w-16 h-16 rounded-lg transition-colors',
-                getIsActive(adminNavItem.href)
-                    ? 'bg-primary/20 text-primary'
-                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-                )}
-            >
-                <adminNavItem.icon className="w-6 h-6 mb-1" />
-                <span className="text-xs">{adminNavItem.label}</span>
-            </div>
-            </Link>
-        )}
     </nav>
   );
 }
