@@ -56,6 +56,7 @@ const adminFeatures = [
   {
     title: "Manage Users",
     description: "View, edit, and manage users in the Firebase Console.",
+    icon: Users,
     href: `https://console.firebase.google.com/project/${process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID}/authentication/users`,
     isExternal: true,
   },
