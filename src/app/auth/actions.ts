@@ -3,7 +3,7 @@
 
 import { z } from 'zod';
 import { auth, db } from '@/lib/firebase';
-import { createUserWithEmailAndPassword, signOut } from 'firebase/auth';
+import { createUserWithEmailAndPassword, sendPasswordResetEmail, signOut } from 'firebase/auth';
 import { FirebaseError } from 'firebase/app';
 import { doc, setDoc } from 'firebase/firestore';
 
@@ -11,6 +11,8 @@ const signupSchema = z.object({
   email: z.string().email(),
   password: z.string().min(6, 'Password must be at least 6 characters long'),
 });
+
+const emailSchema = z.string().email();
 
 export async function handleSignUp(data: z.infer<typeof signupSchema>) {
   const validatedData = signupSchema.parse(data);
@@ -48,4 +50,23 @@ export async function handleSignOut() {
     }
     return { success: false, error: 'An unknown error occurred.' };
   }
+}
+
+export async function handlePasswordReset(email: string) {
+    const validatedEmail = emailSchema.parse(email);
+
+    try {
+        await sendPasswordResetEmail(auth, validatedEmail);
+        return { success: true };
+    } catch (error) {
+        if (error instanceof FirebaseError) {
+            // We don't want to reveal if an email exists or not for security reasons.
+            // So, we'll return success even if the user is not found.
+            if (error.code === 'auth/user-not-found') {
+                return { success: true }; 
+            }
+            return { success: false, error: error.message };
+        }
+        return { success: false, error: 'An unknown error occurred.' };
+    }
 }
