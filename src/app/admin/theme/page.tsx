@@ -23,8 +23,8 @@ const themeSchema = z.object({
 });
 
 
-function HSLColorPicker({ name, control, label, errors }: any) {
-    const hslString = control._getWatch(name) || '0 0% 0%';
+function HSLColorPicker({ name, control, label, errors, watch, setValue }: any) {
+    const hslString = watch(name) || '0 0% 0%';
     const [h, s, l] = hslString.split(' ').map((v: string) => parseInt(v));
 
     const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -47,7 +47,7 @@ function HSLColorPicker({ name, control, label, errors }: any) {
             }
             h /= 6;
         }
-        control.setValue(name, `${Math.round(h * 360)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`, { shouldValidate: true });
+        setValue(name, `${Math.round(h * 360)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`, { shouldValidate: true });
     };
 
     function hslToHex(h: number, s: number, l: number) {
@@ -69,7 +69,7 @@ function HSLColorPicker({ name, control, label, errors }: any) {
                     <input
                         type="color"
                         className="w-10 h-10 p-0 border-none appearance-none bg-transparent cursor-pointer"
-                        value={hslToHex(h, s, l)}
+                        value={hslToHex(h || 0, s || 0, l || 0)}
                         onChange={handleColorChange}
                         style={{'--color': `hsl(${hslString})`} as React.CSSProperties}
                     />
@@ -99,7 +99,7 @@ export default function ManageThemePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { control, handleSubmit, reset, formState: { errors } } = useForm<ThemeData>({
+  const { control, handleSubmit, reset, watch, setValue, formState: { errors } } = useForm<ThemeData>({
     resolver: zodResolver(themeSchema),
     defaultValues: {
         primary: '',
@@ -188,9 +188,9 @@ export default function ManageThemePage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <HSLColorPicker name="primary" control={control} label="Primary Color" errors={errors} />
-          <HSLColorPicker name="background" control={control} label="Background Color" errors={errors} />
-          <HSLColorPicker name="accent" control={control} label="Accent Color" errors={errors} />
+          <HSLColorPicker name="primary" control={control} label="Primary Color" errors={errors} watch={watch} setValue={setValue} />
+          <HSLColorPicker name="background" control={control} label="Background Color" errors={errors} watch={watch} setValue={setValue} />
+          <HSLColorPicker name="accent" control={control} label="Accent Color" errors={errors} watch={watch} setValue={setValue} />
         </CardContent>
       </Card>
       
