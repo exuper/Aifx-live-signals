@@ -7,6 +7,7 @@ import { AnimatedBackground } from '@/components/layout/animated-background';
 import { BottomNav } from '@/components/layout/bottom-nav';
 import { getThemeData } from '@/app/admin/theme/actions';
 import { AuthProvider } from '@/hooks/use-auth';
+import { cn } from '@/lib/utils';
 
 export const metadata: Metadata = {
   title: 'AI Forex Signals Live',
@@ -37,7 +38,7 @@ export default async function RootLayout({
       --accent: ${theme.accent};
     }
   `;
-
+  
   return (
     <html lang="en" className="dark">
       <head>
@@ -52,7 +53,7 @@ export default async function RootLayout({
             <AnimatedBackground />
             <div className="flex flex-col min-h-screen">
               <Header />
-              <main className="p-4 sm:p-6 lg:p-8 relative z-10 flex-grow pb-24">
+              <main className="p-4 sm:p-6 lg:p-8 relative z-10 flex-grow pb-24 md:pb-4">
                 {children}
               </main>
               <BottomNav />

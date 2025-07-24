@@ -15,10 +15,18 @@ export default function AnalysisLayout({
   const router = useRouter();
 
   useEffect(() => {
-    // This layout is now public, no redirect needed.
-    // Logic for premium features within the page would handle auth.
+    if (!loading && !user) {
+      router.push('/login?redirect=/analysis');
+    }
   }, [user, loading, router]);
 
-  // Render children immediately
+  if (loading || !user) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="w-8 h-8 animate-spin" />
+      </div>
+    );
+  }
+
   return <>{children}</>;
 }
