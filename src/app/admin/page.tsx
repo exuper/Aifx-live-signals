@@ -56,7 +56,6 @@ const adminFeatures = [
   {
     title: "Manage Users",
     description: "View, edit, and manage users in the Firebase Console.",
-    icon: Users,
     href: `https://console.firebase.google.com/project/${process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID}/authentication/users`,
     isExternal: true,
   },
@@ -68,7 +67,7 @@ export default function AdminPage() {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      router.replace('/admin/login');
+      router.replace('/login/admin');
     } catch (error) {
       console.error("Error signing out: ", error);
     }

@@ -2,7 +2,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
 import { Loader2 } from 'lucide-react';
 import { SidebarNav } from '@/components/layout/sidebar-nav';
@@ -20,6 +20,7 @@ export default function AdminLayout({
 }) {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -29,7 +30,7 @@ export default function AdminLayout({
 
     if (!user) {
       // If there's no user, redirect to the admin login page.
-      router.replace('/admin/login');
+      router.replace('/login/admin');
       return;
     }
 
