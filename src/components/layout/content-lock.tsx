@@ -73,11 +73,14 @@ export function ContentLock({ service }: ContentLockProps) {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <Tabs defaultValue="code" className="w-full">
+                    <Tabs defaultValue="payment" className="w-full">
                         <TabsList className="grid w-full grid-cols-2">
-                            <TabsTrigger value="code">Redeem Code</TabsTrigger>
                             <TabsTrigger value="payment">Make Payment</TabsTrigger>
+                            <TabsTrigger value="code">Redeem Code</TabsTrigger>
                         </TabsList>
+                        <TabsContent value="payment">
+                             <PaymentForm service={service} />
+                        </TabsContent>
                         <TabsContent value="code">
                             <Card className="bg-background/50 border-none shadow-none">
                                 <CardHeader>
@@ -106,9 +109,6 @@ export function ContentLock({ service }: ContentLockProps) {
                                     </Button>
                                 </CardContent>
                             </Card>
-                        </TabsContent>
-                        <TabsContent value="payment">
-                             <PaymentForm service={service} />
                         </TabsContent>
                     </Tabs>
                 </CardContent>

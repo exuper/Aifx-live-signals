@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
 import { Loader2, Landmark, Copy, Upload, Smartphone, Bitcoin } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/use-auth';
@@ -91,7 +90,7 @@ export function PaymentForm({ service }: PaymentFormProps) {
         if (result.success) {
             toast({
                 title: 'Payment Submitted!',
-                description: `Your payment for ${service.title} is being processed. Please contact an admin with your transaction details to receive your access code.`,
+                description: `Your payment proof for ${service.title} is being processed.`,
             });
             setIsSubmitted(true);
         } else {
@@ -119,7 +118,7 @@ export function PaymentForm({ service }: PaymentFormProps) {
                   </CardDescription>
               </CardHeader>
               <CardContent className="flex flex-col items-center gap-4">
-                  <Button onClick={() => setIsSubmitted(false)}>Make Another Payment</Button>
+                  <Button onClick={() => setIsSubmitted(false)}>Make Another Submission</Button>
               </CardContent>
           </Card>
       )
@@ -129,27 +128,20 @@ export function PaymentForm({ service }: PaymentFormProps) {
     <div className="space-y-2 pt-4">
        <Label htmlFor={`receipt-upload-${id}`}>Upload Receipt (Optional)</Label>
        <div className="flex gap-2">
-          <Input id={`receipt-upload-${id}`} type="file" onChange={(e) => setReceipt(e.target.files?.[0] || null)} />
-          <Button variant="secondary" size="icon"><Upload className="h-4 w-4"/></Button>
+          <Input id={`receipt-upload-${id}`} type="file" onChange={(e) => setReceipt(e.target.files?.[0] || null)} className="pt-2 text-xs" />
        </div>
        {receipt && <p className="text-xs text-muted-foreground">Selected: {receipt.name}</p>}
     </div>
   );
 
-  const renderPaymentContent = (category: keyof PaymentGatewaysData, type: string, needsSenderInfo: boolean) => {
-      if (!gateways) {
-          return (
-              <div className="space-y-4 pt-4">
-                  <Skeleton className="h-10 w-full" />
-                  <Skeleton className="h-10 w-full" />
-                  <Skeleton className="h-10 w-full" />
-              </div>
-          )
+  const renderPaymentContent = (category: keyof PaymentGatewaysData, gatewayTitle: string, Icon: React.ElementType, needsSenderInfo: boolean) => {
+      if (!gateways || gateways[category].length === 0) {
+          return null;
       }
       return (
            <Card className="bg-background/50 border-none shadow-none">
                 <CardContent className="p-0 pt-6 space-y-4">
-                    <p className="text-sm text-center text-muted-foreground">Send ${service.priceAmount} to one of the options below.</p>
+                    <p className="text-sm text-center text-muted-foreground">Send ${service.priceAmount} to one of the {gatewayTitle} options below.</p>
                     <Accordion type="single" collapsible className="w-full">
                         {gateways[category].map(gateway => (
                             <AccordionItem key={gateway.id} value={gateway.id}>
@@ -164,17 +156,17 @@ export function PaymentForm({ service }: PaymentFormProps) {
                     </Accordion>
                     {needsSenderInfo && (
                         <div className="space-y-2">
-                            <Label htmlFor="sender-name">Sender/Agent Name</Label>
+                            <Label htmlFor="sender-name">Sender/Agent Name or Transaction ID</Label>
                             <Input 
                                 id="sender-name" 
-                                placeholder="e.g. John Doe or Agent 123" 
+                                placeholder="e.g. John Doe or #123XYZ" 
                                 value={senderName} 
                                 onChange={(e) => setSenderName(e.target.value)} 
                             />
                         </div>
                     )}
                     <ReceiptUpload id={category} />
-                    <Button onClick={() => handleSubmit(type)} className="w-full" disabled={isSubmitting || (needsSenderInfo && !senderName)}>
+                    <Button onClick={() => handleSubmit(gatewayTitle)} className="w-full" disabled={isSubmitting || (needsSenderInfo && !senderName)}>
                         {isSubmitting ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : null}
                         I Have Paid, Submit for Verification
                     </Button>
@@ -182,12 +174,37 @@ export function PaymentForm({ service }: PaymentFormProps) {
            </Card>
       )
   }
+  
+  if (!gateways) {
+    return (
+      <div className="space-y-4 pt-4">
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-20 w-full" />
+        <Skeleton className="h-10 w-full" />
+      </div>
+    );
+  }
 
   return (
-    <>
-      <TabsContent value="crypto">{renderPaymentContent('crypto', 'Crypto', false)}</TabsContent>
-      <TabsContent value="transfer">{renderPaymentContent('transfer', 'Transfer', true)}</TabsContent>
-      <TabsContent value="mobile">{renderPaymentContent('mobile', 'Mobile Money', true)}</TabsContent>
-    </>
+    <Accordion type="multiple" className="w-full">
+        <AccordionItem value="crypto">
+            <AccordionTrigger className="text-lg font-headline"><Bitcoin className="mr-2"/>Crypto</AccordionTrigger>
+            <AccordionContent>
+                {renderPaymentContent('crypto', 'Crypto', Bitcoin, false)}
+            </AccordionContent>
+        </AccordionItem>
+         <AccordionItem value="transfer">
+            <AccordionTrigger className="text-lg font-headline"><Landmark className="mr-2"/>Bank/Wire Transfer</AccordionTrigger>
+            <AccordionContent>
+                 {renderPaymentContent('transfer', 'Transfer', Landmark, true)}
+            </AccordionContent>
+        </AccordionItem>
+         <AccordionItem value="mobile">
+            <AccordionTrigger className="text-lg font-headline"><Smartphone className="mr-2"/>Mobile Money</AccordionTrigger>
+            <AccordionContent>
+                {renderPaymentContent('mobile', 'Mobile Money', Smartphone, true)}
+            </AccordionContent>
+        </AccordionItem>
+    </Accordion>
   );
 }
