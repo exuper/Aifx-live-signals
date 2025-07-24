@@ -11,15 +11,20 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
-import { getThemeData, updateThemeData, ThemeData } from './actions';
-import { Loader2, Palette } from 'lucide-react';
+import { getAppearanceData, updateAppearanceData, AppearanceData } from './actions';
+import { Loader2, Palette, Video, Type } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { fontMap } from '@/lib/fonts';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const hslColorRegex = /^(\d{1,3})\s+(\d{1,3})%\s+(\d{1,3})%$/;
-const themeSchema = z.object({
+const appearanceSchema = z.object({
   primary: z.string().regex(hslColorRegex, "Must be HSL values like '72 100% 50%'"),
-  background: z.string().regex(hslColorRegex, "Must be HSL values"),
+  backgroundHsl: z.string().regex(hslColorRegex, "Must be HSL values"),
   accent: z.string().regex(hslColorRegex, "Must be HSL values"),
+  background: z.enum(['lines', 'particles', 'aurora']),
+  fontBody: z.string().min(1, "Body font is required."),
+  fontHeadline: z.string().min(1, "Headline font is required."),
 });
 
 
@@ -95,28 +100,31 @@ function HSLColorPicker({ name, control, label, errors, watch, setValue }: any) 
     );
 }
 
-export default function ManageThemePage() {
+export default function ManageAppearancePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { control, handleSubmit, reset, watch, setValue, formState: { errors } } = useForm<ThemeData>({
-    resolver: zodResolver(themeSchema),
+  const { control, handleSubmit, reset, watch, setValue, formState: { errors } } = useForm<AppearanceData>({
+    resolver: zodResolver(appearanceSchema),
     defaultValues: {
         primary: '',
-        background: '',
-        accent: ''
+        backgroundHsl: '',
+        accent: '',
+        background: 'lines',
+        fontBody: 'Inter',
+        fontHeadline: 'Space Grotesk'
     }
   });
 
   useEffect(() => {
     async function loadData() {
       try {
-        const data = await getThemeData();
+        const data = await getAppearanceData();
         reset(data);
       } catch (error) {
         toast({
-          title: "Error loading theme",
-          description: "Could not fetch theme data.",
+          title: "Error loading appearance settings",
+          description: "Could not fetch appearance data.",
           variant: "destructive",
         });
       } finally {
@@ -126,23 +134,22 @@ export default function ManageThemePage() {
     loadData();
   }, [reset]);
 
-  const onSubmit = async (data: ThemeData) => {
+  const onSubmit = async (data: AppearanceData) => {
     setIsSubmitting(true);
     try {
-      await updateThemeData(data);
+      await updateAppearanceData(data);
       toast({
-        title: "Theme Updated!",
-        description: "Your new theme has been applied.",
+        title: "Appearance Updated!",
+        description: "Your new appearance settings have been applied. The page will now reload.",
       });
       // Force a reload to see theme changes immediately
-      window.location.reload();
+      setTimeout(() => window.location.reload(), 1500);
     } catch (error) {
       toast({
         title: "Update Failed",
-        description: "Could not save your theme. Please try again.",
+        description: "Could not save your settings. Please try again.",
         variant: "destructive",
       });
-    } finally {
       setIsSubmitting(false);
     }
   };
@@ -151,14 +158,14 @@ export default function ManageThemePage() {
     return (
         <div className="space-y-8">
             <PageHeader
-                title="Theme Settings"
+                title="Appearance Settings"
                 description="Customize the look and feel of your application."
             />
             <Card>
                 <CardHeader>
                     <Skeleton className="h-8 w-1/3" />
                 </CardHeader>
-                <CardContent className="space-y-8">
+                <CardContent className="space-y-8 mt-6">
                    <div className="space-y-4">
                         <Skeleton className="h-20 w-full" />
                         <Skeleton className="h-20 w-full" />
@@ -173,9 +180,39 @@ export default function ManageThemePage() {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
       <PageHeader
-        title="Theme Settings"
-        description="Customize the look and feel of your application. Colors are in HSL format."
+        title="Appearance Settings"
+        description="Customize the look and feel of your application."
       />
+
+       <Card>
+        <CardHeader>
+          <CardTitle className="font-headline flex items-center gap-2">
+            <Video className="w-6 h-6" />
+            Animated Background
+          </CardTitle>
+           <CardDescription>
+            Choose the animated background style for the entire application.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+             <Controller
+                name="background"
+                control={control}
+                render={({ field }) => (
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <SelectTrigger className="w-full md:w-1/2">
+                    <SelectValue placeholder="Select a background style" />
+                    </SelectTrigger>
+                    <SelectContent>
+                    <SelectItem value="lines">Falling Lines</SelectItem>
+                    <SelectItem value="particles">Floating Particles</SelectItem>
+                    <SelectItem value="aurora">Gradient Aurora</SelectItem>
+                    </SelectContent>
+                </Select>
+                )}
+            />
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
@@ -184,20 +221,72 @@ export default function ManageThemePage() {
             Brand Colors
           </CardTitle>
           <CardDescription>
-            Click the color swatch to use a color picker, or enter HSL values directly.
+            Click the color swatch to use a picker, or enter HSL values directly.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <HSLColorPicker name="primary" control={control} label="Primary Color" errors={errors} watch={watch} setValue={setValue} />
-          <HSLColorPicker name="background" control={control} label="Background Color" errors={errors} watch={watch} setValue={setValue} />
+          <HSLColorPicker name="backgroundHsl" control={control} label="Background Color" errors={errors} watch={watch} setValue={setValue} />
           <HSLColorPicker name="accent" control={control} label="Accent Color" errors={errors} watch={watch} setValue={setValue} />
+        </CardContent>
+      </Card>
+      
+       <Card>
+        <CardHeader>
+          <CardTitle className="font-headline flex items-center gap-2">
+            <Type className="w-6 h-6" />
+            Typography
+          </CardTitle>
+           <CardDescription>
+            Select the fonts for body text and headlines.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+                <Label>Headline Font</Label>
+                 <Controller
+                    name="fontHeadline"
+                    control={control}
+                    render={({ field }) => (
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <SelectTrigger>
+                        <SelectValue placeholder="Select a font" />
+                        </SelectTrigger>
+                        <SelectContent>
+                        {Object.values(fontMap).map(font => (
+                            <SelectItem key={font.name} value={font.name} style={{fontFamily: font.variable}}>{font.name}</SelectItem>
+                        ))}
+                        </SelectContent>
+                    </Select>
+                    )}
+                />
+            </div>
+            <div className="space-y-2">
+                <Label>Body Font</Label>
+                   <Controller
+                    name="fontBody"
+                    control={control}
+                    render={({ field }) => (
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <SelectTrigger>
+                        <SelectValue placeholder="Select a font" />
+                        </SelectTrigger>
+                        <SelectContent>
+                        {Object.values(fontMap).map(font => (
+                            <SelectItem key={font.name} value={font.name} style={{fontFamily: font.variable}}>{font.name}</SelectItem>
+                        ))}
+                        </SelectContent>
+                    </Select>
+                    )}
+                />
+            </div>
         </CardContent>
       </Card>
       
       <div className="flex justify-end">
         <Button type="submit" disabled={isSubmitting}>
           {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {isSubmitting ? 'Saving...' : 'Save Theme'}
+          {isSubmitting ? 'Saving...' : 'Save Appearance'}
         </Button>
       </div>
 

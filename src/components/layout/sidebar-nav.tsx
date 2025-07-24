@@ -21,7 +21,7 @@ const adminItems = [
     { href: '/admin/signals', icon: BarChart2, label: 'Manage Signals' },
     { href: '/admin/calendar', icon: Calendar, label: 'Manage Calendar' },
     { href: '/admin/content', icon: LinkIcon, label: 'Manage Content' },
-    { href: '/admin/theme', icon: Palette, label: 'Theme Settings' },
+    { href: '/admin/appearance', icon: Palette, label: 'Appearance' },
     { href: '/admin/gateways', icon: Network, label: 'Payment Gateways' },
     { href: '/admin/payments', icon: DollarSign, label: 'View Payments' },
 ]

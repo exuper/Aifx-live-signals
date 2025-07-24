@@ -33,10 +33,10 @@ const adminFeatures = [
     isExternal: false,
   },
   {
-    title: "Theme Settings",
-    description: "Customize the application's look and feel.",
+    title: "Appearance",
+    description: "Customize the application's look, feel, and fonts.",
     icon: Palette,
-    href: "/admin/theme",
+    href: "/admin/appearance",
     isExternal: false,
   },
    {
