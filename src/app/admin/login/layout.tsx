@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Bell, LogOut, Menu } from "lucide-react";
