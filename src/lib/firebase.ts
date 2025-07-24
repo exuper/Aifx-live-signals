@@ -1,4 +1,4 @@
-// Import the functions you need from the SDKs you need
+
 import { initializeApp, getApps, getApp, FirebaseApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
@@ -11,11 +11,11 @@ const firebaseConfig = {
   projectId: "ai-forex-signals-live",
   storageBucket: "ai-forex-signals-live.appspot.com",
   messagingSenderId: "513364826247",
-  appId: "1:513364826247:web:81c256a41c6ceccc368022"
+  appId: "1:513364826247:web:feb953e33cc48252368022"
 };
 
 // A robust function to initialize and get the Firebase app instance
-const app: FirebaseApp = getApps().length ? getApp() : initializeApp(firebaseConfig);
+const app: FirebaseApp = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
 export const auth = getAuth(app);
 export const db = getFirestore(app);
