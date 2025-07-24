@@ -1,66 +1,69 @@
 import { Signal } from "@/lib/mock-data";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "./ui/card";
-import { Badge } from "./ui/badge";
+import { Card, CardContent } from "./ui/card";
 import { cn } from "@/lib/utils";
-import { ArrowDown, ArrowUp, Clock } from "lucide-react";
+import { ArrowDown, ArrowUp } from "lucide-react";
 
 type SignalCardProps = {
   signal: Signal;
 };
+
+const InfoPill = ({ label, value, className }: { label: string, value: string | number, className?: string }) => (
+    <div className="flex flex-col items-center">
+        <div className={cn("text-xs px-4 py-1 rounded-full w-full text-center font-semibold", className)}>
+            {value}
+        </div>
+        <span className="text-xs text-muted-foreground mt-1">{label}</span>
+    </div>
+);
 
 export function SignalCard({ signal }: SignalCardProps) {
   const isBuy = signal.action === 'BUY';
   const isActive = signal.status === 'Active';
 
   const formatTimestamp = (timestamp: any) => {
-    if (!timestamp) return 'Just now';
-    // Firebase timestamps can be seconds/nanoseconds objects
-    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    return date.toLocaleString();
+    if (!timestamp) return { date: 'N/A', time: 'N/A' };
+    const dateObj = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    const date = dateObj.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' });
+    const time = dateObj.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    return { date, time };
   };
 
+  const { date, time } = formatTimestamp(signal.createdAt);
 
   return (
-    <Card className={cn("flex flex-col", isActive ? "border-primary/50" : "opacity-70")}>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="font-headline text-2xl">{signal.pair}</CardTitle>
-          <Badge variant={isBuy ? "default" : "destructive"} className={cn(
-            isBuy ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700",
-            "text-white"
-          )}>
-            {isBuy ? <ArrowUp className="mr-1 h-4 w-4" /> : <ArrowDown className="mr-1 h-4 w-4" />}
-            {signal.action}
-          </Badge>
+    <Card className={cn("flex flex-col", isActive ? "" : "opacity-60")}>
+      <CardContent className="p-4 space-y-3">
+        <div className="grid grid-cols-[auto,1fr,auto] items-center gap-4">
+            <div className={cn("flex items-center font-bold", isBuy ? "text-green-400" : "text-red-400")}>
+                {isBuy ? <ArrowUp className="h-5 w-5" /> : <ArrowDown className="h-5 w-5" />}
+                <span className="ml-1">{signal.action}</span>
+            </div>
+            <p className="font-bold text-lg text-center font-headline">{signal.pair}</p>
+            <p className="font-mono text-lg">{signal.entry}</p>
         </div>
-        <CardDescription>Entry Price: {signal.entry}</CardDescription>
-      </CardHeader>
-      <CardContent className="flex-grow space-y-4">
-        <div className="flex justify-between items-center p-3 rounded-md bg-secondary">
-          <span className="text-muted-foreground">Stop Loss</span>
-          <span className="font-mono text-red-400">{signal.stopLoss}</span>
+
+        <div className="text-xs text-muted-foreground text-center">
+            <span>{date}</span> <span className="ml-2">{time}</span>
         </div>
-        <div className="space-y-2">
-          <div className="flex justify-between items-center p-3 rounded-md bg-secondary">
-            <span className="text-muted-foreground">Take Profit 1</span>
-            <span className="font-mono text-green-400">{signal.takeProfit1}</span>
-          </div>
-          <div className="flex justify-between items-center p-3 rounded-md bg-secondary">
-            <span className="text-muted-foreground">Take Profit 2</span>
-            <span className="font-mono text-green-400">{signal.takeProfit2}</span>
-          </div>
+        
+        <div className="grid grid-cols-3 gap-2 pt-2">
+            <InfoPill 
+                label="Status" 
+                value={signal.status} 
+                className={cn(isActive ? (isBuy ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400') : 'bg-muted text-muted-foreground')}
+            />
+             <InfoPill 
+                label="TP1" 
+                value={signal.takeProfit1} 
+                className="bg-secondary text-foreground"
+            />
+             <InfoPill 
+                label="SL" 
+                value={signal.stopLoss} 
+                className="bg-secondary text-foreground"
+            />
         </div>
       </CardContent>
-      <CardFooter className="flex justify-between items-center">
-        <Badge variant={isActive ? "outline" : "secondary"} className={cn(isActive && "border-primary text-primary")}>
-          {signal.status}
-        </Badge>
-         <div className="flex items-center text-xs text-muted-foreground">
-          <Clock className="mr-1 h-3 w-3" />
-          {/* Format timestamp if it exists */}
-          {signal.createdAt && formatTimestamp(signal.createdAt)}
-        </div>
-      </CardFooter>
     </Card>
   );
 }
