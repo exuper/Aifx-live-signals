@@ -1,7 +1,8 @@
+
 import { Signal } from "@/lib/mock-data";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { cn } from "@/lib/utils";
-import { ArrowDown, ArrowUp, Star } from "lucide-react";
+import { ArrowDown, ArrowUp, Star, TrendingDown, TrendingUp } from "lucide-react";
 import type { Timestamp } from "firebase/firestore";
 import { Badge } from "./ui/badge";
 
@@ -32,6 +33,31 @@ export function SignalCard({ signal }: SignalCardProps) {
 
   const { date, time } = formatTimestamp(signal.createdAt as any);
 
+  const getOutcomeBadge = () => {
+    if (isActive || !signal.outcome) {
+        return <Badge variant={isActive ? 'default' : 'secondary'} className={cn(isActive ? (isBuy ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400') : 'bg-muted text-muted-foreground')}>
+                {signal.status}
+            </Badge>
+    }
+    if (signal.outcome === 'Profit') {
+      return (
+        <Badge className="bg-green-500/20 text-green-400">
+            <TrendingUp className="w-4 h-4 mr-1" />
+            Profit
+        </Badge>
+      );
+    }
+    if (signal.outcome === 'Loss') {
+        return (
+            <Badge className="bg-red-500/20 text-red-400">
+                <TrendingDown className="w-4 h-4 mr-1" />
+                Loss
+            </Badge>
+        );
+    }
+    return null;
+  }
+
   return (
     <Card className={cn("flex flex-col", isActive ? "" : "opacity-60")}>
        <CardHeader className="p-3">
@@ -40,9 +66,7 @@ export function SignalCard({ signal }: SignalCardProps) {
                 {isBuy ? <ArrowUp className="h-5 w-5" /> : <ArrowDown className="h-5 w-5" />}
                 <span className="ml-1">{signal.action}</span>
             </div>
-             <Badge variant={isActive ? 'default' : 'secondary'} className={cn(isActive ? (isBuy ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400') : 'bg-muted text-muted-foreground')}>
-                {signal.status}
-            </Badge>
+             {getOutcomeBadge()}
          </div>
          <div className="flex justify-between items-baseline">
             <CardTitle className="font-headline text-xl flex items-center gap-2">

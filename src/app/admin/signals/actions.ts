@@ -39,11 +39,29 @@ export async function updateSignalStatus(id: string, status: 'Active' | 'Expired
     try {
         const signalRef = doc(db, "signals", id);
         await updateDoc(signalRef, {
-            status: status
+            status: status,
+            outcome: null, // Reset outcome when re-activating
         });
     } catch (error) {
         console.error("Error updating signal status:", error);
         throw new Error("Could not update signal status in the database.");
+    }
+}
+
+export async function updateSignalOutcome(id: string, outcome: 'Profit' | 'Loss') {
+    if (!id) {
+        throw new Error("Signal ID is required.");
+    }
+
+    try {
+        const signalRef = doc(db, "signals", id);
+        await updateDoc(signalRef, {
+            status: 'Expired',
+            outcome: outcome
+        });
+    } catch (error) {
+        console.error("Error updating signal outcome:", error);
+        throw new Error("Could not update signal outcome in the database.");
     }
 }
 

@@ -15,8 +15,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
-import { createSignal, updateSignalStatus, deleteSignal } from './actions';
-import { Loader2, PlusCircle, Trash2, CheckCircle, XCircle, ArrowUp, ArrowDown, Clock, Star } from 'lucide-react';
+import { createSignal, updateSignalStatus, deleteSignal, updateSignalOutcome } from './actions';
+import { Loader2, PlusCircle, Trash2, CheckCircle, XCircle, ArrowUp, ArrowDown, Clock, Star, TrendingUp, TrendingDown } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { Switch } from '@/components/ui/switch';
@@ -119,6 +119,22 @@ export default function ManageSignalsPage() {
       });
       }
   };
+
+  const handleUpdateOutcome = async (id: string, outcome: 'Profit' | 'Loss') => {
+      try {
+        await updateSignalOutcome(id, outcome);
+        toast({
+            title: "Signal Expired",
+            description: `Signal has been marked as a ${outcome}.`
+        })
+      } catch (error) {
+           toast({
+            title: "Error",
+            description: "Failed to update signal outcome.",
+            variant: "destructive",
+      });
+      }
+  }
   
   const handleDeleteSignal = async () => {
       if (!signalToDelete) return;
@@ -246,8 +262,8 @@ export default function ManageSignalsPage() {
 
         <div className="lg:col-span-2">
            <div className="space-y-6">
-                <SignalList title="Active Signals" signals={activeSignals} onUpdate={handleUpdateStatus} onDelete={(id) => setSignalToDelete(id)} isLoading={isLoading} />
-                <SignalList title="Signal History" signals={expiredSignals} onUpdate={handleUpdateStatus} onDelete={(id) => setSignalToDelete(id)} isLoading={isLoading} />
+                <SignalList title="Active Signals" signals={activeSignals} onUpdateStatus={handleUpdateStatus} onUpdateOutcome={handleUpdateOutcome} onDelete={(id) => setSignalToDelete(id)} isLoading={isLoading} />
+                <SignalList title="Signal History" signals={expiredSignals} onUpdateStatus={handleUpdateStatus} onUpdateOutcome={handleUpdateOutcome} onDelete={(id) => setSignalToDelete(id)} isLoading={isLoading} />
            </div>
         </div>
       </div>
@@ -256,7 +272,7 @@ export default function ManageSignalsPage() {
 }
 
 
-function SignalList({title, signals, onUpdate, onDelete, isLoading}: {title: string, signals: Signal[], onUpdate: (id: string, status: 'Active' | 'Expired') => void, onDelete: (id: string) => void, isLoading: boolean}) {
+function SignalList({title, signals, onUpdateStatus, onUpdateOutcome, onDelete, isLoading}: {title: string, signals: Signal[], onUpdateStatus: (id: string, status: 'Active' | 'Expired') => void, onUpdateOutcome: (id: string, outcome: 'Profit' | 'Loss') => void, onDelete: (id: string) => void, isLoading: boolean}) {
     const formatTimestamp = (timestamp: any) => {
         if (!timestamp) return 'Just now';
         const date = timestamp instanceof Date ? timestamp : (timestamp as Timestamp).toDate();
@@ -315,6 +331,11 @@ function SignalList({title, signals, onUpdate, onDelete, isLoading}: {title: str
                                         <Badge variant={signal.status === 'Active' ? 'outline' : 'secondary'} className={cn(signal.status === 'Active' && "border-primary text-primary")}>
                                             {signal.status}
                                         </Badge>
+                                        {signal.outcome && (
+                                            <Badge variant={signal.outcome === 'Profit' ? 'default' : 'destructive'}>
+                                                {signal.outcome}
+                                            </Badge>
+                                        )}
                                     </div>
                                 </CardHeader>
                                 <CardContent className="p-4 grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
@@ -337,12 +358,18 @@ function SignalList({title, signals, onUpdate, onDelete, isLoading}: {title: str
                                 </CardContent>
                                 <CardFooter className="bg-muted/50 p-2 flex justify-end gap-2">
                                       {signal.status === 'Active' ? (
-                                        <Button variant="ghost" size="sm" onClick={() => onUpdate(signal.id, 'Expired')}>
-                                            <XCircle className="w-4 h-4 mr-2 text-orange-500" />
-                                            Expire
-                                        </Button>
+                                        <>
+                                            <Button variant="ghost" size="sm" className="text-green-500 hover:text-green-500 hover:bg-green-500/10" onClick={() => onUpdateOutcome(signal.id, 'Profit')}>
+                                                <TrendingUp className="w-4 h-4 mr-2" />
+                                                Mark as Profit
+                                            </Button>
+                                             <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-500 hover:bg-red-500/10" onClick={() => onUpdateOutcome(signal.id, 'Loss')}>
+                                                <TrendingDown className="w-4 h-4 mr-2" />
+                                                Mark as Loss
+                                            </Button>
+                                        </>
                                     ) : (
-                                        <Button variant="ghost" size="sm" onClick={() => onUpdate(signal.id, 'Active')}>
+                                        <Button variant="ghost" size="sm" onClick={() => onUpdateStatus(signal.id, 'Active')}>
                                             <CheckCircle className="w-4 h-4 mr-2 text-green-500" />
                                             Re-activate
                                         </Button>

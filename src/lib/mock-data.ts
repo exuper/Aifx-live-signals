@@ -10,6 +10,7 @@ export type Signal = {
   takeProfit1: number;
   takeProfit2: number;
   status: 'Active' | 'Expired';
+  outcome?: 'Profit' | 'Loss';
   isPremium?: boolean;
   createdAt: Timestamp | Date;
 };
