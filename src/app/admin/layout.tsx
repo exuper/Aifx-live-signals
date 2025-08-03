@@ -35,7 +35,10 @@ export default function AdminLayout({
     }
 
     // If the user's email is not in the admin list, deny access.
-    if (!adminEmails.includes(user.email || '')) {
+    const userEmail = user.email?.toLowerCase();
+    const authorizedAdmins = adminEmails.map(email => email.toLowerCase());
+
+    if (!userEmail || !authorizedAdmins.includes(userEmail)) {
       toast({
         title: 'Access Denied',
         description: 'You are not authorized to view this page.',
@@ -47,7 +50,9 @@ export default function AdminLayout({
   }, [user, loading, router, toast]);
 
   // While checking for authentication or if the user is not an admin, show a loading spinner.
-  if (loading || !user || !adminEmails.includes(user.email || '')) {
+  const isAuthorized = user && user.email && adminEmails.map(e => e.toLowerCase()).includes(user.email.toLowerCase());
+  
+  if (loading || !isAuthorized) {
     return (
       <div className="flex justify-center items-center h-screen bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
