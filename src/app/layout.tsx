@@ -10,10 +10,9 @@ import { BlobsBackground } from '@/components/layout/blobs-background';
 import { GridBackground } from '@/components/layout/grid-background';
 import { BottomNav } from '@/components/layout/bottom-nav';
 import { getAppearanceData } from '@/app/admin/appearance/actions';
-import { AuthProvider } from '@/hooks/use-auth';
 import { cn } from '@/lib/utils';
 import { fontMap } from '@/lib/fonts';
-import { SubscriptionProvider } from '@/hooks/use-subscription';
+import { Providers } from '@/components/layout/providers';
 
 export const metadata: Metadata = {
   title: 'AI Forex Signals Live',
@@ -72,8 +71,7 @@ export default async function RootLayout({
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
       </head>
       <body className={cn("font-body antialiased min-h-screen", fontBody.className, fontHeadline.className)}>
-        <AuthProvider>
-          <SubscriptionProvider>
+        <Providers>
             <SelectedBackground />
             <div className="flex flex-col min-h-screen">
               <Header />
@@ -82,8 +80,7 @@ export default async function RootLayout({
               </main>
               <BottomNav />
             </div>
-          </SubscriptionProvider>
-        </AuthProvider>
+        </Providers>
         <Toaster />
       </body>
     </html>
