@@ -1,11 +1,7 @@
 {
   "name": "AI Forex Signals Live",
-  "short_name": "AIFx Signals",
+  "short_name": "Forex Signals",
   "description": "Live forex signals, AI-powered technical analysis, and economic calendar.",
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#333333",
-  "theme_color": "#228B22",
   "icons": [
     {
       "src": "/icons/icon-192x192.png",
@@ -17,5 +13,10 @@
       "sizes": "512x512",
       "type": "image/png"
     }
-  ]
+  ],
+  "theme_color": "#333333",
+  "background_color": "#333333",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait"
 }
