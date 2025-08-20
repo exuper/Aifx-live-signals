@@ -68,6 +68,13 @@ const adminFeatures = [
     isExternal: false,
   },
   {
+    title: "Manage Users",
+    description: "View all registered users and their last seen time.",
+    icon: Users,
+    href: "/admin/users",
+    isExternal: false,
+  },
+  {
     title: "View Payments",
     description: "Track and verify user payments and subscriptions.",
     icon: DollarSign,
@@ -80,14 +87,7 @@ const adminFeatures = [
     icon: ShieldCheck,
     href: "/admin/verifications",
     isExternal: false,
-  },
-  {
-    title: "Manage Users",
-    description: "View, edit, and manage users in the Firebase Console.",
-    icon: Users,
-    href: `https://console.firebase.google.com/project/${process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID}/authentication/users`,
-    isExternal: true,
-  },
+  }
 ];
 
 export default function AdminPage() {

@@ -8,11 +8,11 @@ import Link from "next/link";
 import { AppLogo } from "./app-logo";
 
 const navItems = [
-  { href: '/', icon: BarChart2, label: 'Live Signals' },
-  { href: '/analysis', icon: BotMessageSquare, label: 'Chart Analysis' },
+  { href: '/', icon: BarChart2, label: 'Signals' },
+  { href: '/analysis', icon: BotMessageSquare, label: 'Analysis' },
   { href: '/trading-plan', icon: FileText, label: 'Trading Plan' },
-  { href: '/calendar', icon: Calendar, label: 'Economic Calendar' },
-  { href: '/premium', icon: ShieldCheck, label: 'Premium / VIP' },
+  { href: '/calendar', icon: Calendar, label: 'Calendar' },
+  { href: '/premium', icon: ShieldCheck, label: 'Premium' },
   { href: '/community', icon: Users, label: 'Community' },
 ];
 
@@ -26,6 +26,7 @@ const adminItems = [
     { href: '/admin/appearance', icon: Palette, label: 'Appearance' },
     { href: '/admin/gateways', icon: Network, label: 'Payment Gateways' },
     { href: '/admin/codes', icon: KeyRound, label: 'Manage Codes' },
+    { href: '/admin/users', icon: Users, label: 'Manage Users' },
     { href: '/admin/payments', icon: DollarSign, label: 'View Payments' },
     { href: '/admin/verifications', icon: ShieldCheck, label: 'Verifications' },
 ]
