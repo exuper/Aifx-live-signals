@@ -17,6 +17,12 @@ const nextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'pay.google.com',
+        port: '',
+        pathname: '/**',
+      }
     ],
   },
 };

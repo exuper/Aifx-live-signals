@@ -14,6 +14,9 @@ import { getPaymentGateways, PaymentGatewaysData } from '@/app/admin/gateways/ac
 import { Skeleton } from './ui/skeleton';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { useRouter } from 'next/navigation';
+import GooglePayButton from '@google-pay/button-react';
+import { Separator } from './ui/separator';
+
 
 interface PaymentFormProps {
   service: {
@@ -64,7 +67,7 @@ export function PaymentForm({ service }: PaymentFormProps) {
     loadGateways();
   }, []);
 
-  const handleSubmit = async (event: React.FormEvent) => {
+  const handleManualSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
     if (!user) {
@@ -115,6 +118,22 @@ export function PaymentForm({ service }: PaymentFormProps) {
         setIsSubmitting(false);
     }
   };
+
+  const onGooglePayLoadPaymentData = (paymentData: google.payments.api.PaymentData) => {
+      console.log('Load payment data', paymentData);
+      
+      // This is a placeholder. Here you would send the paymentData.paymentMethodData.tokenizationData.token
+      // to your server, which would then use a payment processor (like Stripe) to charge the user.
+      
+      // After your server successfully processes the payment, you would create the subscription.
+      toast({
+        title: "Google Pay Success (Demo)",
+        description: "Payment token received. In a real app, this would now be processed by the server."
+      });
+
+      // For this demo, we'll mark it as "submitted"
+      setIsSubmitted(true);
+  }
   
   if (isSubmitted) {
       return (
@@ -125,7 +144,7 @@ export function PaymentForm({ service }: PaymentFormProps) {
                   </div>
                   <CardTitle className="font-headline text-2xl">Submission Received!</CardTitle>
                   <CardDescription>
-                      Your payment submission for "{service.title}" has been received. Please contact an admin with your transaction details to get your access code.
+                      Your payment submission for "{service.title}" has been received. An admin will verify it shortly. You can also contact an admin with your transaction details to get your access code.
                   </CardDescription>
               </CardHeader>
               <CardContent className="flex flex-col items-center gap-4">
@@ -168,61 +187,113 @@ export function PaymentForm({ service }: PaymentFormProps) {
   return (
     <Card className="bg-background/50 border-none shadow-none">
         <CardContent className="p-0 pt-6">
-            <form onSubmit={handleSubmit} className="space-y-6">
-                <div>
-                    <Label className="text-base font-semibold">1. Choose Payment Method</Label>
-                    <p className="text-sm text-muted-foreground mb-4">Select a method and send ${service.priceAmount} to the provided details.</p>
-                     <Accordion type="multiple" className="w-full">
-                        <AccordionItem value="crypto">
-                            <AccordionTrigger className="text-lg font-headline"><Bitcoin className="mr-2"/>Crypto</AccordionTrigger>
-                            <AccordionContent>
-                                {renderPaymentOptions('crypto', 'Crypto')}
-                            </AccordionContent>
-                        </AccordionItem>
-                        <AccordionItem value="transfer">
-                            <AccordionTrigger className="text-lg font-headline"><Landmark className="mr-2"/>Bank/Wire Transfer</AccordionTrigger>
-                            <AccordionContent>
-                                {renderPaymentOptions('transfer', 'Transfer')}
-                            </AccordionContent>
-                        </AccordionItem>
-                        <AccordionItem value="mobile">
-                            <AccordionTrigger className="text-lg font-headline"><Smartphone className="mr-2"/>Mobile Money</AccordionTrigger>
-                            <AccordionContent>
-                                {renderPaymentOptions('mobile', 'Mobile Money')}
-                            </AccordionContent>
-                        </AccordionItem>
-                    </Accordion>
+            <div className="space-y-6">
+                
+                <div className="px-4">
+                     <GooglePayButton
+                        environment="TEST"
+                        paymentRequest={{
+                            apiVersion: 2,
+                            apiVersionMinor: 0,
+                            allowedPaymentMethods: [
+                                {
+                                    type: 'CARD',
+                                    parameters: {
+                                        allowedAuthMethods: ['PAN_ONLY', 'CRYPTOGRAM_3DS'],
+                                        allowedCardNetworks: ['MASTERCARD', 'VISA'],
+                                    },
+                                    tokenizationSpecification: {
+                                        type: 'PAYMENT_GATEWAY',
+                                        parameters: {
+                                            gateway: 'example', // Replace with your payment gateway
+                                            gatewayMerchantId: 'exampleGatewayMerchantId', // Replace
+                                        },
+                                    },
+                                },
+                            ],
+                            merchantInfo: {
+                                merchantId: process.env.NEXT_PUBLIC_GOOGLE_PAY_MERCHANT_ID || "your-merchant-id-here",
+                                merchantName: 'AI Forex Signals Live',
+                            },
+                            transactionInfo: {
+                                totalPriceStatus: 'FINAL',
+                                totalPriceLabel: 'Total',
+                                totalPrice: service.priceAmount.toString(),
+                                currencyCode: 'USD',
+                                countryCode: 'US',
+                            },
+                        }}
+                        onLoadPaymentData={onGooglePayLoadPaymentData}
+                        buttonColor="black"
+                        buttonType="pay"
+                        buttonSizeMode="fill"
+                    />
+                    <p className="text-xs text-muted-foreground text-center mt-2">A fast and secure way to pay.</p>
                 </div>
 
-                <div>
-                    <Label className="text-base font-semibold">2. Submit Your Proof</Label>
-                     <p className="text-sm text-muted-foreground mb-4">Fill out the details below so we can verify your payment.</p>
-                    <div className="space-y-4 p-4 border rounded-md">
-                        <div className="space-y-2">
-                            <Label htmlFor="sender-name">Sender/Agent Name or Transaction ID</Label>
-                            <Input 
-                                id="sender-name" 
-                                placeholder="e.g. John Doe or #123XYZ" 
-                                value={senderName} 
-                                onChange={(e) => setSenderName(e.target.value)} 
-                                required
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="receipt-upload">Upload Receipt (Optional)</Label>
-                            <div className="flex gap-2">
-                                <Input id="receipt-upload" type="file" onChange={(e) => setReceipt(e.target.files?.[0] || null)} className="pt-2 text-xs" />
+                <div className="flex items-center gap-4">
+                    <Separator className="flex-1" />
+                    <span className="text-xs text-muted-foreground">OR PAY MANUALLY</span>
+                    <Separator className="flex-1" />
+                </div>
+
+
+                <form onSubmit={handleManualSubmit} className="space-y-6">
+                    <div>
+                        <Label className="text-base font-semibold">1. Choose Manual Method</Label>
+                        <p className="text-sm text-muted-foreground mb-4">Select a method and send ${service.priceAmount} to the provided details.</p>
+                        <Accordion type="multiple" className="w-full">
+                            <AccordionItem value="crypto">
+                                <AccordionTrigger className="text-lg font-headline"><Bitcoin className="mr-2"/>Crypto</AccordionTrigger>
+                                <AccordionContent>
+                                    {renderPaymentOptions('crypto', 'Crypto')}
+                                </AccordionContent>
+                            </AccordionItem>
+                            <AccordionItem value="transfer">
+                                <AccordionTrigger className="text-lg font-headline"><Landmark className="mr-2"/>Bank/Wire Transfer</AccordionTrigger>
+                                <AccordionContent>
+                                    {renderPaymentOptions('transfer', 'Transfer')}
+                                </AccordionContent>
+                            </AccordionItem>
+                            <AccordionItem value="mobile">
+                                <AccordionTrigger className="text-lg font-headline"><Smartphone className="mr-2"/>Mobile Money</AccordionTrigger>
+                                <AccordionContent>
+                                    {renderPaymentOptions('mobile', 'Mobile Money')}
+                                </AccordionContent>
+                            </AccordionItem>
+                        </Accordion>
+                    </div>
+
+                    <div>
+                        <Label className="text-base font-semibold">2. Submit Your Proof</Label>
+                        <p className="text-sm text-muted-foreground mb-4">Fill out the details below so we can verify your payment.</p>
+                        <div className="space-y-4 p-4 border rounded-md">
+                            <div className="space-y-2">
+                                <Label htmlFor="sender-name">Sender/Agent Name or Transaction ID</Label>
+                                <Input 
+                                    id="sender-name" 
+                                    placeholder="e.g. John Doe or #123XYZ" 
+                                    value={senderName} 
+                                    onChange={(e) => setSenderName(e.target.value)} 
+                                    required
+                                />
                             </div>
-                            {receipt && <p className="text-xs text-muted-foreground">Selected: {receipt.name}</p>}
+                            <div className="space-y-2">
+                                <Label htmlFor="receipt-upload">Upload Receipt (Optional)</Label>
+                                <div className="flex gap-2">
+                                    <Input id="receipt-upload" type="file" onChange={(e) => setReceipt(e.target.files?.[0] || null)} className="pt-2 text-xs" />
+                                </div>
+                                {receipt && <p className="text-xs text-muted-foreground">Selected: {receipt.name}</p>}
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <Button type="submit" className="w-full" size="lg" disabled={isSubmitting || !selectedMethod || !senderName}>
-                    {isSubmitting ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Send className="mr-2" />}
-                    I Have Paid, Submit for Verification
-                </Button>
-            </form>
+                    <Button type="submit" className="w-full" size="lg" disabled={isSubmitting || !selectedMethod || !senderName}>
+                        {isSubmitting ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Send className="mr-2" />}
+                        I Have Paid, Submit for Verification
+                    </Button>
+                </form>
+            </div>
         </CardContent>
     </Card>
   );
