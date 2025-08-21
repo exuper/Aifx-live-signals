@@ -4,16 +4,27 @@
 import { useEffect, useState } from 'react';
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { DollarSign, CheckCircle, Clock, MoreVertical } from "lucide-react";
+import { DollarSign, Trash2 } from "lucide-react";
 import { db } from '@/lib/firebase';
 import { collection, onSnapshot, orderBy, query, Timestamp } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { updatePaymentStatus } from './actions';
+import { Button, buttonVariants } from '@/components/ui/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { updatePaymentStatus, deletePayment } from './actions';
 import { toast } from '@/hooks/use-toast';
+import { MoreVertical } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Payment {
     id: string;
@@ -32,6 +43,7 @@ interface Payment {
 export default function ViewPaymentsPage() {
     const [payments, setPayments] = useState<Payment[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [paymentToDelete, setPaymentToDelete] = useState<string | null>(null);
 
     useEffect(() => {
         const q = query(collection(db, "payments"), orderBy("createdAt", "desc"));
@@ -65,6 +77,18 @@ export default function ViewPaymentsPage() {
             });
         }
     };
+    
+    const handleDelete = async () => {
+        if (!paymentToDelete) return;
+        try {
+            await deletePayment(paymentToDelete);
+            toast({ title: "Payment Deleted", description: "The payment record has been removed." });
+        } catch (error) {
+            toast({ title: "Error", description: "Failed to delete the payment.", variant: "destructive" });
+        } finally {
+            setPaymentToDelete(null);
+        }
+    };
 
     const pendingPayments = payments.filter(p => p.status === 'pending');
     const completedPayments = payments.filter(p => p.status === 'completed');
@@ -75,28 +99,47 @@ export default function ViewPaymentsPage() {
                 title="View Payments"
                 description="Review and manage user payment submissions."
             />
+            
+            <AlertDialog open={!!paymentToDelete} onOpenChange={() => setPaymentToDelete(null)}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete this payment record.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleDelete} className={buttonVariants({ variant: "destructive" })}>Delete</AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
             <PaymentTable
                 title="Pending Payments"
                 payments={pendingPayments}
                 isLoading={isLoading}
                 onStatusUpdate={handleStatusUpdate}
+                onDelete={(id) => setPaymentToDelete(id)}
             />
              <PaymentTable
                 title="Completed Payments"
                 payments={completedPayments}
                 isLoading={isLoading}
                 onStatusUpdate={handleStatusUpdate}
+                onDelete={(id) => setPaymentToDelete(id)}
             />
         </div>
     );
 }
 
 
-function PaymentTable({ title, payments, isLoading, onStatusUpdate }: {
+function PaymentTable({ title, payments, isLoading, onStatusUpdate, onDelete }: {
     title: string;
     payments: Payment[];
     isLoading: boolean;
     onStatusUpdate: (paymentId: string, status: 'pending' | 'completed') => void;
+    onDelete: (id: string) => void;
 }) {
      const formatTimestamp = (timestamp: any) => {
         if (!timestamp) return 'N/A';
@@ -172,6 +215,11 @@ function PaymentTable({ title, payments, isLoading, onStatusUpdate }: {
                                                         Mark as Pending
                                                     </DropdownMenuItem>
                                                 )}
+                                                <DropdownMenuSeparator />
+                                                <DropdownMenuItem onClick={() => onDelete(payment.id)} className="text-destructive focus:text-destructive">
+                                                    <Trash2 className="mr-2 h-4 w-4" />
+                                                    Delete
+                                                </DropdownMenuItem>
                                             </DropdownMenuContent>
                                         </DropdownMenu>
                                     </TableCell>
