@@ -87,6 +87,13 @@ const adminFeatures = [
     icon: ShieldCheck,
     href: "/admin/verifications",
     isExternal: false,
+  },
+   {
+    title: "Firebase Console",
+    description: "For advanced user management like deletions.",
+    icon: Users,
+    href: `https://console.firebase.google.com/project/${process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID}/authentication/users`,
+    isExternal: true,
   }
 ];
 
